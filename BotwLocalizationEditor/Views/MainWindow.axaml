@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:BotwLocalizationEditor.ViewModels"
+        xmlns:sys="using:System"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="BotwLocalizationEditor.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        x:CompileBindings="True"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="BotwLocalizationEditor">
+  <StackPanel>
+    <DockPanel>
+      <Menu DockPanel.Dock="Top">
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open" Command="{ReflectionBinding OnOpen}"/>
+          <Separator/>
+          <MenuItem Header="_Exit"/>
+        </MenuItem>
+      </Menu>
+    </DockPanel>
+    <StackPanel Margin="10" Orientation="Horizontal" HorizontalAlignment="Center">
+      <RadioButton GroupName="Language Setting"
+                   Content="One Language"
+                   Command="{ReflectionBinding OnLanguageSelected}"
+                   IsChecked="{Binding IsSingleLanguage}">
+        <RadioButton.CommandParameter>
+          <sys:Int32>0</sys:Int32>
+        </RadioButton.CommandParameter>
+      </RadioButton>
+      <Separator Width="10" Background="Transparent"/>
+      <RadioButton GroupName="Language Setting"
+                   Content="Two Languages"
+                   Command="{ReflectionBinding OnLanguageSelected}"
+                   IsChecked="{Binding IsDualLanguage}">
+        <RadioButton.CommandParameter>
+          <sys:Int32>1</sys:Int32>
+        </RadioButton.CommandParameter>
+      </RadioButton>
+      <Separator Width="10" Background="Transparent"/>
+      <RadioButton GroupName="Language Setting"
+                   Content="All Languages"
+                   Command="{ReflectionBinding OnLanguageSelected}"
+                   IsChecked="{Binding IsOmniLanguage}">
+        <RadioButton.CommandParameter>
+          <sys:Int32>2</sys:Int32>
+        </RadioButton.CommandParameter>
+      </RadioButton>
+    </StackPanel>
+    <ContentControl Content="{Binding SelectedLanguageControl}" />
+  </StackPanel>
+
+</Window>

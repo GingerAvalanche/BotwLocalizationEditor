@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BotwLocalizationEditor.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BotwLocalizationEditor.Views.DualLanguageControl"
+             x:DataType="vm:DualLanguageViewModel"
+             x:CompileBindings="True">
+  <UserControl.DataContext>
+    <vm:DualLanguageViewModel/>
+  </UserControl.DataContext>
+  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <TextBlock>content/Pack/Bootup_XXxx.pack//Message/Msg_XXxx.product.ssarc//</TextBlock>
+    <ComboBox Name="FolderBox"
+              Items="{Binding MsbtFolders}"
+              SelectedItem="{Binding ChosenMsbtFolder}"/>
+    <TextBlock>/</TextBlock>
+    <ComboBox Name="MsbtBox"
+              Items="{Binding MsbtNames}"
+              SelectedItem="{Binding ChosenMsbtName}"/>
+    <TextBlock>/</TextBlock>
+    <ComboBox Name="KeyBox"
+              Items="{Binding MsbtKeys}"
+              SelectedItem="{Binding ChosenMsbtKey}"/>
+  </StackPanel>
+</UserControl>
