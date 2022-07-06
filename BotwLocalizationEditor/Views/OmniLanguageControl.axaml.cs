@@ -15,17 +15,16 @@ namespace BotwLocalizationEditor.Views
         public void Update(string[] langs)
         {
             RootGrid.Children.Clear();
+            RootGrid.RowDefinitions.Clear();
 
-            RowDefinition rowDef = new() { Height = GridLength.Star };
             IndexerBinding zero = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(0)), BindingMode.Default);
             IndexerBinding one = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(1)), BindingMode.Default);
             IndexerBinding two = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(2)), BindingMode.Default);
-            Binding saveLoc = new("SaveLoc");
 
             for (int i = 0; i < langs.Length; i++)
             {
+                RootGrid.RowDefinitions.Add(new() { Height = GridLength.Star });
                 IndexerBinding row = new(RootGrid, new AttachedProperty<int>("Row", typeof(Grid), new(i)), BindingMode.Default);
-                RootGrid.RowDefinitions.Add(rowDef);
                 RootGrid.Children.Add(new TextBlock()
                 {
                     [!Grid.RowProperty] = row,
@@ -42,7 +41,7 @@ namespace BotwLocalizationEditor.Views
                 {
                     [!Grid.RowProperty] = row,
                     [!Grid.ColumnProperty] = two,
-                    [!Button.CommandProperty] = saveLoc,
+                    [!Button.CommandProperty] = new Binding("SaveLoc"),
                     Content = "Apply",
                 });
                 ((Button)RootGrid.Children[2])[!Button.CommandParameterProperty] = new IndexerBinding(RootGrid.Children[2], new StyledProperty<int>("CommandParameter", typeof(Button), new(i)), BindingMode.Default);
