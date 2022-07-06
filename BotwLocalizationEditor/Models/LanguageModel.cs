@@ -68,7 +68,7 @@ namespace BotwLocalizationEditor.Models
 
         public void AddMsbtKeyOneLang(string lang, string msbtFolder, string msbtName, string key)
         {
-            if (!msbts[lang][msbtName].ContainsKey(key))
+            if (!msbts[lang][msbtFolder][msbtName].ContainsKey(key))
             {
                 msbts[lang][msbtFolder][msbtName][key] = new("", "");
             }

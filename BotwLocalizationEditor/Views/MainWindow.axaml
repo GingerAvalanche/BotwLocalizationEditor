@@ -8,26 +8,18 @@
         x:Class="BotwLocalizationEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="True"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="BotwLocalizationEditor">
+        Icon="/Assets/icon.png"
+        Title="{Binding Title}">
   <StackPanel>
     <DockPanel>
       <Menu DockPanel.Dock="Top">
         <MenuItem Header="_File">
-          <MenuItem Header="_Open" Command="{ReflectionBinding OnOpen}"/>
+          <MenuItem Header="_Open" Name="Open"/>
           <Separator/>
-          <MenuItem Header="_Save" Command="{ReflectionBinding OnSave}">
-            <MenuItem.CommandParameter>
-              <sys:Boolean>false</sys:Boolean>
-            </MenuItem.CommandParameter>
-          </MenuItem>
-          <MenuItem Header="Save _As..." Command="{ReflectionBinding OnSave}">
-            <MenuItem.CommandParameter>
-              <sys:Boolean>true</sys:Boolean>
-            </MenuItem.CommandParameter>
-          </MenuItem>
+          <MenuItem Header="_Save" Name="Save"/>
+          <MenuItem Header="Save _As..." Name="SaveAs"/>
           <Separator/>
-          <MenuItem Header="_Exit"/>
+          <MenuItem Header="_Exit" Name="Exit"/>
         </MenuItem>
       </Menu>
     </DockPanel>

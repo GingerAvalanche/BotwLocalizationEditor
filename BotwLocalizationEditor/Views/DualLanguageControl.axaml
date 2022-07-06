@@ -18,13 +18,19 @@
                 Items="{Binding MsbtFolders}"
                 SelectedItem="{Binding ChosenMsbtFolder}"/>
       <TextBlock FontSize="22">/</TextBlock>
-      <ComboBox Name="MsbtBox"
-                Items="{Binding MsbtNames}"
-                SelectedItem="{Binding ChosenMsbtName}"/>
+      <StackPanel>
+        <ComboBox Name="MsbtBox"
+                  Items="{Binding MsbtNames}"
+                  SelectedItem="{Binding ChosenMsbtName}"/>
+        <Button DockPanel.Dock="Bottom" Name="AddMsbtButton">Add MSBT</Button>
+      </StackPanel>
       <TextBlock FontSize="22">/</TextBlock>
-      <ComboBox Name="KeyBox"
-                Items="{Binding MsbtKeys}"
-                SelectedItem="{Binding ChosenMsbtKey}"/>
+      <StackPanel>
+        <ComboBox Name="KeyBox"
+                  Items="{Binding MsbtKeys}"
+                  SelectedItem="{Binding ChosenMsbtKey}"/>
+        <Button DockPanel.Dock="Bottom" Name="AddMsbtKeyButton">Add Key</Button>
+      </StackPanel>
     </StackPanel>
     <Grid Margin="100">
       <Grid.ColumnDefinitions>

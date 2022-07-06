@@ -5,11 +5,14 @@ using BotwLocalizationEditor.Interfaces;
 
 namespace BotwLocalizationEditor.Views
 {
-    public partial class OmniLanguageControl : UserControl, IUpdatable
+    public partial class OmniLanguageControl : LanguageControlBase, IUpdatable
     {
         public OmniLanguageControl()
         {
             InitializeComponent();
+
+            AddMsbtButton.Click += AddMsbtButton_Click;
+            AddMsbtKeyButton.Click += AddMsbtKeyButton_Click;
         }
 
         public void Update(string[] langs)

@@ -1,14 +1,15 @@
-using Avalonia.Controls;
 using BotwLocalizationEditor.Interfaces;
 
 namespace BotwLocalizationEditor.Views
 {
-    public partial class SingleLanguageControl : UserControl, IUpdatable
+    public partial class SingleLanguageControl : LanguageControlBase, IUpdatable
     {
-        //private bool HandleThis = true;
         public SingleLanguageControl()
         {
             InitializeComponent();
+
+            AddMsbtButton.Click += AddMsbtButton_Click;
+            AddMsbtKeyButton.Click += AddMsbtKeyButton_Click;
         }
 
         public void Update(string[] langs) { }

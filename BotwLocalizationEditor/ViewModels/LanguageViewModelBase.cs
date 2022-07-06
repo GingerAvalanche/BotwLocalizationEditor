@@ -117,6 +117,18 @@ namespace BotwLocalizationEditor.ViewModels
             model.Save(folder);
         }
 
+        public void AddMsbt(string msbtName)
+        {
+            model.AddMsbtAllLangs(chosenMsbtFolder, msbtName);
+            MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
+        }
+
+        public void AddMsbtKey(string keyName)
+        {
+            model.AddMsbtKeyAllLangs(chosenMsbtFolder, chosenMsbtName, keyName);
+            MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
+        }
+
         protected virtual void OnLanguagesSet(string[] langs)
         {
             MsbtFolders = model.GetMsbtFolders();
