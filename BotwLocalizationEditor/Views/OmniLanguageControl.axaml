@@ -10,5 +10,27 @@
   <UserControl.DataContext>
     <vm:OmniLanguageViewModel/>
   </UserControl.DataContext>
-  OmniLanguageControl
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
+      <TextBlock FontSize="22">content/Pack/Bootup_XXxx.pack//Message/Msg_XXxx.product.ssarc//</TextBlock>
+      <ComboBox Name="FolderBox"
+                Items="{Binding MsbtFolders}"
+                SelectedItem="{Binding ChosenMsbtFolder}"/>
+      <TextBlock FontSize="22">/</TextBlock>
+      <ComboBox Name="MsbtBox"
+                Items="{Binding MsbtNames}"
+                SelectedItem="{Binding ChosenMsbtName}"/>
+      <TextBlock FontSize="22">/</TextBlock>
+      <ComboBox Name="KeyBox"
+                Items="{Binding MsbtKeys}"
+                SelectedItem="{Binding ChosenMsbtKey}"/>
+    </StackPanel>
+    <Grid Name="RootGrid" Margin="100">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="1*"/>
+        <ColumnDefinition Width="5*"/>
+        <ColumnDefinition Width="1*"/>
+      </Grid.ColumnDefinitions>
+    </Grid>
+  </DockPanel>
 </UserControl>

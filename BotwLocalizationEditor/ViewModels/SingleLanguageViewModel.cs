@@ -1,61 +1,48 @@
-﻿using BotwLocalizationEditor.Models;
-using ReactiveUI;
-using System.Linq;
+﻿using ReactiveUI;
 
 namespace BotwLocalizationEditor.ViewModels
 {
-    public class SingleLanguageViewModel : LanguageViewModelBase, IFolderChoosable
+    public class SingleLanguageViewModel : LanguageViewModelBase
     {
-        private string chosenLanguage;
-        private string locText;
-        public string ChosenLanguage { get => chosenLanguage; set => this.RaiseAndSetIfChanged(ref chosenLanguage, value); }
-        public string LocText { get => locText; set => locText = value; }
-
-        public SingleLanguageViewModel() : base()
+        private string chosenLanguage = "";
+        private string locText = "";
+        public string ChosenLanguage
         {
-            chosenLanguage = "";
-            locText = "";
+            get => chosenLanguage;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref chosenLanguage, value);
+                if (!(string.IsNullOrEmpty(value) ||
+                    string.IsNullOrEmpty(chosenMsbtFolder) ||
+                    string.IsNullOrEmpty(chosenMsbtName) ||
+                    string.IsNullOrEmpty(chosenMsbtKey)))
+                {
+                    LocText = model.GetOneLangMsbtValue(value, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey);
+                }
+            }
+        }
+        public string LocText
+        {
+            get => locText;
+            set => this.RaiseAndSetIfChanged(ref locText, value);
         }
 
-        public void OnFolderChosen(LanguageModel languageModel)
+        public SingleLanguageViewModel() : base() { }
+
+        protected override void OnLanguagesSet(string[] langs)
         {
-            model = languageModel;
-            Languages = model.GetLangs();
-            ChosenLanguage = langs[0];
+            this.RaiseAndSetIfChanged(ref chosenLanguage, langs[0], nameof(ChosenLanguage));
+            base.OnLanguagesSet(langs);
         }
 
-        internal void LanguageChanged(string newLang)
+        protected override void OnKeyChanged(string key)
         {
-            MsbtFolders = model.GetOneLangMsbtFolders(newLang);
-            ChosenMsbtFolder = msbtFolders.First();
-            MsbtNames = model.GetOneLangMsbtNames(newLang, chosenMsbtFolder);
-            ChosenMsbtName = msbtNames.First();
-            MsbtKeys = model.GetOneLangMsbtKeys(newLang, chosenMsbtFolder, chosenMsbtName);
-            ChosenMsbtKey = msbtKeys.FirstOrDefault("");
+            LocText = model.GetOneLangMsbtValue(chosenLanguage, chosenMsbtFolder, chosenMsbtName, key);
         }
 
-        internal void FolderChanged(string newFolder)
+        internal void SaveLoc()
         {
-            MsbtNames = model.GetOneLangMsbtNames(chosenLanguage, newFolder);
-            ChosenMsbtName = msbtNames.First();
-            MsbtKeys = model.GetOneLangMsbtKeys(chosenLanguage, newFolder, chosenMsbtName);
-            ChosenMsbtKey = msbtKeys.FirstOrDefault("");
-        }
-
-        internal void MsbtChanged(string newMsbt)
-        {
-            MsbtKeys = model.GetOneLangMsbtKeys(chosenLanguage, chosenMsbtFolder, newMsbt);
-            ChosenMsbtKey = msbtKeys.FirstOrDefault("");
-        }
-
-        internal string KeyChanged(string lang, string folder, string name, string key)
-        {
-            return model.GetOneLangMsbtValue(lang, folder, name, key);
-        }
-
-        internal void SaveLoc(string newLoc)
-        {
-            model.SetOneLangMsbtValue(chosenLanguage, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey, newLoc);
+            model.SetOneLangMsbtValue(chosenLanguage, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey, locText);
         }
     }
 }

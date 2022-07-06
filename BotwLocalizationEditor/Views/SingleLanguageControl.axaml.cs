@@ -1,69 +1,22 @@
 using Avalonia.Controls;
-using Avalonia.Interactivity;
-using BotwLocalizationEditor.ViewModels;
+using BotwLocalizationEditor.Interfaces;
 
 namespace BotwLocalizationEditor.Views
 {
-    public partial class SingleLanguageControl : UserControl
+    public partial class SingleLanguageControl : UserControl, IUpdatable
     {
-        private bool HandleThis = true;
+        //private bool HandleThis = true;
         public SingleLanguageControl()
         {
             InitializeComponent();
 
-            LanguageBox.SelectionChanged += LanguageBox_SelectionChanged;
-            FolderBox.SelectionChanged += FolderBox_SelectionChanged;
-            MsbtBox.SelectionChanged += MsbtBox_SelectionChanged;
-            KeyBox.SelectionChanged += KeyBox_SelectionChanged;
-            ApplyButton.Click += ApplyButton_Click;
+            System.Diagnostics.Debug.WriteLine(ApplyButton[!Button.CommandParameterProperty]);
+            System.Diagnostics.Debug.WriteLine(((Avalonia.Data.IndexerBinding)ApplyButton[!Button.CommandParameterProperty]).Property);
+            System.Diagnostics.Debug.WriteLine(((Avalonia.Data.IndexerBinding)ApplyButton[!Button.CommandParameterProperty]).Property.GetType());
+            System.Diagnostics.Debug.WriteLine(((Avalonia.Data.IndexerBinding)ApplyButton[!Button.CommandParameterProperty]).Property.PropertyType);
+            System.Diagnostics.Debug.WriteLine(((Avalonia.Data.IndexerBinding)ApplyButton[!Button.CommandParameterProperty]).Property.Name);
         }
 
-        private void LanguageBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-        {
-            if (!HandleThis) return;
-            HandleThis = false;
-            SingleLanguageViewModel vm = (SingleLanguageViewModel)DataContext!;
-            string newLang = ((sender as ComboBox)!.SelectedItem as string)!;
-            vm.LanguageChanged(newLang);
-            LocBox.Text = vm.KeyChanged(newLang, vm.ChosenMsbtFolder, vm.ChosenMsbtName, vm.ChosenMsbtKey);
-            HandleThis = true;
-        }
-
-        private void FolderBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-        {
-            if (!HandleThis) return;
-            HandleThis = false;
-            SingleLanguageViewModel vm = (SingleLanguageViewModel)DataContext!;
-            string newFolder = ((sender as ComboBox)!.SelectedItem as string)!;
-            vm.FolderChanged(newFolder);
-            LocBox.Text = vm.KeyChanged(vm.ChosenLanguage, newFolder, vm.ChosenMsbtName, vm.ChosenMsbtKey);
-            HandleThis = true;
-        }
-
-        private void MsbtBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-        {
-            if (!HandleThis) return;
-            HandleThis = false;
-            SingleLanguageViewModel vm = (SingleLanguageViewModel)DataContext!;
-            string newMsbt = ((sender as ComboBox)!.SelectedItem as string)!;
-            vm.MsbtChanged(newMsbt);
-            LocBox.Text = vm.KeyChanged(vm.ChosenLanguage, vm.ChosenMsbtFolder, newMsbt, vm.ChosenMsbtKey);
-            HandleThis = true;
-        }
-
-        private void KeyBox_SelectionChanged(object? sender, SelectionChangedEventArgs e)
-        {
-            if (!HandleThis) return;
-            HandleThis = false;
-            SingleLanguageViewModel vm = (SingleLanguageViewModel)DataContext!;
-            string newKey = ((sender as ComboBox)!.SelectedItem as string)!;
-            LocBox.Text = vm.KeyChanged(vm.ChosenLanguage, vm.ChosenMsbtFolder, vm.ChosenMsbtName, newKey);
-            HandleThis = true;
-        }
-
-        private void ApplyButton_Click(object? sender, RoutedEventArgs e)
-        {
-            (DataContext as SingleLanguageViewModel)!.SaveLoc(LocBox.Text);
-        }
+        public void Update(string[] langs) { }
     }
 }

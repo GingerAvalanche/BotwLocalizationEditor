@@ -16,6 +16,17 @@
         <MenuItem Header="_File">
           <MenuItem Header="_Open" Command="{ReflectionBinding OnOpen}"/>
           <Separator/>
+          <MenuItem Header="_Save" Command="{ReflectionBinding OnSave}">
+            <MenuItem.CommandParameter>
+              <sys:Boolean>false</sys:Boolean>
+            </MenuItem.CommandParameter>
+          </MenuItem>
+          <MenuItem Header="Save _As..." Command="{ReflectionBinding OnSave}">
+            <MenuItem.CommandParameter>
+              <sys:Boolean>true</sys:Boolean>
+            </MenuItem.CommandParameter>
+          </MenuItem>
+          <Separator/>
           <MenuItem Header="_Exit"/>
         </MenuItem>
       </Menu>

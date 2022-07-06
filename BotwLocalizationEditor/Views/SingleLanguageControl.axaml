@@ -12,21 +12,21 @@
   </UserControl.DataContext>
   <DockPanel>
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
-      <TextBlock>content/Pack/Bootup_</TextBlock>
+      <TextBlock FontSize="22">content/Pack/Bootup_</TextBlock>
       <ComboBox Name="LanguageBox"
                 Items="{Binding Languages}"
                 SelectedItem="{Binding ChosenLanguage}"/>
-      <TextBlock>.pack//Message/Msg_</TextBlock>
-      <TextBlock Text="{Binding ChosenLanguage}"/>
-      <TextBlock>.product.ssarc//</TextBlock>
+      <TextBlock FontSize="22">.pack//Message/Msg_</TextBlock>
+      <TextBlock FontSize="22" Text="{Binding ChosenLanguage}"/>
+      <TextBlock FontSize="22">.product.ssarc//</TextBlock>
       <ComboBox Name="FolderBox"
                 Items="{Binding MsbtFolders}"
                 SelectedItem="{Binding ChosenMsbtFolder}"/>
-      <TextBlock>/</TextBlock>
+      <TextBlock FontSize="22">/</TextBlock>
       <ComboBox Name="MsbtBox"
                 Items="{Binding MsbtNames}"
                 SelectedItem="{Binding ChosenMsbtName}"/>
-      <TextBlock>/</TextBlock>
+      <TextBlock FontSize="22">/</TextBlock>
       <ComboBox Name="KeyBox"
                 Items="{Binding MsbtKeys}"
                 SelectedItem="{Binding ChosenMsbtKey}"/>
@@ -39,7 +39,7 @@
       </Grid.ColumnDefinitions>
       <TextBlock Grid.Column="0" Text="{Binding ChosenLanguage}"/>
       <TextBox Grid.Column="1" Name="LocBox" Text="{Binding LocText}"/>
-      <Button Grid.Column="2" Name="ApplyButton">Apply</Button>
+      <Button Grid.Column="2" Name="ApplyButton" Command="{ReflectionBinding SaveLoc}">Apply</Button>
     </Grid>
   </DockPanel>
 </UserControl>
