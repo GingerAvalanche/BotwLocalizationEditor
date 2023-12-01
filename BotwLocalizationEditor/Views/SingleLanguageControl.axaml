@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BotwLocalizationEditor.ViewModels"
+             xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="BotwLocalizationEditor.Views.SingleLanguageControl"
              x:DataType="vm:SingleLanguageViewModel"
@@ -10,42 +11,82 @@
   <UserControl.DataContext>
     <vm:SingleLanguageViewModel/>
   </UserControl.DataContext>
-  <DockPanel>
-    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
-      <TextBlock FontSize="22">content/Pack/Bootup_</TextBlock>
-      <ComboBox Name="LanguageBox"
-                Items="{Binding Languages}"
-                SelectedItem="{Binding ChosenLanguage}"/>
-      <TextBlock FontSize="22">.pack//Message/Msg_</TextBlock>
-      <TextBlock FontSize="22" Text="{Binding ChosenLanguage}"/>
-      <TextBlock FontSize="22">.product.ssarc//</TextBlock>
-      <ComboBox Name="FolderBox"
-                Items="{Binding MsbtFolders}"
-                SelectedItem="{Binding ChosenMsbtFolder}"/>
-      <TextBlock FontSize="22">/</TextBlock>
-      <StackPanel>
-        <ComboBox Name="MsbtBox"
-                  Items="{Binding MsbtNames}"
-                  SelectedItem="{Binding ChosenMsbtName}"/>
-        <Button DockPanel.Dock="Bottom" Name="AddMsbtButton">Add MSBT</Button>
-      </StackPanel>
-      <TextBlock FontSize="22">/</TextBlock>
-      <StackPanel>
-        <ComboBox Name="KeyBox"
-                  Items="{Binding MsbtKeys}"
-                  SelectedItem="{Binding ChosenMsbtKey}"/>
-        <Button DockPanel.Dock="Bottom" Name="AddMsbtKeyButton">Add Key</Button>
-      </StackPanel>
-    </StackPanel>
-    <Grid Margin="100">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="1*"/>
-        <ColumnDefinition Width="5*"/>
-        <ColumnDefinition Width="1*"/>
-      </Grid.ColumnDefinitions>
-      <TextBlock Grid.Column="0" Text="{Binding ChosenLanguage}"/>
-      <TextBox Grid.Column="1" Text="{Binding LocText}"/>
-      <Button Grid.Column="2" Command="{ReflectionBinding SaveLoc}">Apply</Button>
+  <Grid ColumnDefinitions="1*,3*">
+    <Grid Grid.Column="0" ColumnDefinitions="1*,1*,1*,1*" RowDefinitions="1*,30">
+      <ContentControl Grid.Column="0"
+                      Grid.Row="0"
+                      Grid.ColumnSpan="4"
+                      Content="{Binding SelectedBrowserControl}"/>
+      <Button Grid.Column="0"
+              Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              VerticalAlignment="Stretch"
+              Command="{Binding OnLangTabSelected}">
+        Language
+      </Button>
+      <Button Grid.Column="1"
+              Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              VerticalAlignment="Stretch"
+              Command="{Binding OnTabSelected}">
+        <Button.CommandParameter>
+          <sys:Int32>0</sys:Int32>
+        </Button.CommandParameter>
+        Folder
+      </Button>
+      <Button Grid.Column="2"
+              Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              VerticalAlignment="Stretch"
+              Command="{Binding OnTabSelected}">
+        <Button.CommandParameter>
+          <sys:Int32>1</sys:Int32>
+        </Button.CommandParameter>
+        MSBT
+      </Button>
+      <Button Grid.Column="3"
+              Grid.Row="1"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              VerticalAlignment="Stretch"
+              Command="{Binding OnTabSelected}">
+        <Button.CommandParameter>
+          <sys:Int32>2</sys:Int32>
+        </Button.CommandParameter>
+        Key
+      </Button>
     </Grid>
-  </DockPanel>
+    <Grid Margin="10" Grid.Column="1" RowDefinitions="30,1*,10,30">
+      <StackPanel Grid.Column="0"
+                  Grid.ColumnSpan="1"
+                  Grid.Row="0"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Center">
+        <TextBlock Padding="0,0,4,0">Language:</TextBlock>
+        <TextBlock Text="{Binding ChosenLanguage}"/>
+        <Separator Width="0"></Separator>
+        <TextBlock Padding="0,0,4,0">Folder:</TextBlock>
+        <TextBlock Text="{Binding ChosenMsbtFolder}"/>
+        <Separator Width="0"></Separator>
+        <TextBlock Padding="0,0,4,0">File:</TextBlock>
+        <TextBlock Text="{Binding ChosenMsbtName}"/>
+        <Separator Width="0"></Separator>
+        <TextBlock Padding="0,0,4,0">Key:</TextBlock>
+        <TextBlock Text="{Binding ChosenMsbtKey}"/>
+      </StackPanel>
+      <TextBox Grid.Column="0"
+               Grid.Row="1"
+               Text="{Binding LocText}"/>
+      <Button Grid.Column="0"
+              Grid.Row="3"
+              VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Command="{ReflectionBinding SaveLoc}">
+        Apply
+      </Button>
+    </Grid>
+  </Grid>
 </UserControl>

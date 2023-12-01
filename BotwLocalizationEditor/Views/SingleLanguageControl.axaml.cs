@@ -1,4 +1,5 @@
 using BotwLocalizationEditor.Interfaces;
+using BotwLocalizationEditor.ViewModels;
 
 namespace BotwLocalizationEditor.Views
 {
@@ -8,8 +9,9 @@ namespace BotwLocalizationEditor.Views
         {
             InitializeComponent();
 
-            AddMsbtButton.Click += AddMsbtButton_Click;
-            AddMsbtKeyButton.Click += AddMsbtKeyButton_Click;
+            SingleLanguageViewModel vm = (DataContext as SingleLanguageViewModel)!;
+            vm.MsbtBrowser.AddButton.Click += AddMsbtButton_Click;
+            vm.KeyBrowser.AddButton.Click += AddMsbtKeyButton_Click;
         }
 
         public void Update(string[] langs) { }

@@ -1,53 +1,59 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
 using BotwLocalizationEditor.Interfaces;
+using BotwLocalizationEditor.ViewModels;
+using System;
 
 namespace BotwLocalizationEditor.Views
 {
     public partial class OmniLanguageControl : LanguageControlBase, IUpdatable
     {
+        private readonly Grid[] locGrids;
+        private readonly TextBlock[] langBlocks;
         public OmniLanguageControl()
         {
             InitializeComponent();
+            locGrids = new Grid[16];
+            langBlocks = new TextBlock[16];
 
-            AddMsbtButton.Click += AddMsbtButton_Click;
-            AddMsbtKeyButton.Click += AddMsbtKeyButton_Click;
+            OmniLanguageViewModel vm = (OmniLanguageViewModel)DataContext!;
+            int gridNum = -1;
+
+            foreach (Control child in RootGrid.Children)
+            {
+                if (child is Grid grid)
+                {
+                    grid.IsVisible = false;
+                    locGrids[++gridNum] = grid;
+                    foreach (Control child2 in grid.Children)
+                    {
+                        if (child2 is TextBox box)
+                        {
+                            vm.langBoxes[gridNum] = box;
+                        }
+                        if (child2 is TextBlock block)
+                        {
+                            langBlocks[gridNum] = block;
+                        }
+                    }
+                }
+            }
         }
 
         public void Update(string[] langs)
         {
-            RootGrid.Children.Clear();
-            RootGrid.RowDefinitions.Clear();
+            Array.ForEach(locGrids, grid => grid.IsVisible = false);
 
-            IndexerBinding zero = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(0)), BindingMode.Default);
-            IndexerBinding one = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(1)), BindingMode.Default);
-            IndexerBinding two = new(RootGrid, new AttachedProperty<int>("Column", typeof(Grid), new(2)), BindingMode.Default);
+            int squareSide = (int)Math.Ceiling(Math.Sqrt(langs.Length));
+            string[] defs = new string[squareSide];
+            Array.Fill(defs, "1*");
+            string def = string.Join(",", defs);
+            RootGrid.ColumnDefinitions = new(def);
+            RootGrid.RowDefinitions = new(def);
 
-            for (int i = 0; i < langs.Length; i++)
+            foreach ((int langIdx, int gridIdx) in OmniLanguageViewModel.GridIndices(langs.Length))
             {
-                RootGrid.RowDefinitions.Add(new() { Height = GridLength.Star });
-                IndexerBinding row = new(RootGrid, new AttachedProperty<int>("Row", typeof(Grid), new(i)), BindingMode.Default);
-                RootGrid.Children.Add(new TextBlock()
-                {
-                    [!Grid.RowProperty] = row,
-                    [!Grid.ColumnProperty] = zero,
-                    [!TextBlock.TextProperty] = new Binding($"Languages[{i}]"),
-                });
-                RootGrid.Children.Add(new TextBox()
-                {
-                    [!Grid.RowProperty] = row,
-                    [!Grid.ColumnProperty] = one,
-                    [!TextBox.TextProperty] = new Binding($"LocText{i}"),
-                });
-                RootGrid.Children.Add(new Button()
-                {
-                    [!Grid.RowProperty] = row,
-                    [!Grid.ColumnProperty] = two,
-                    [!Button.CommandProperty] = new Binding("SaveLoc"),
-                    Content = "Apply",
-                });
-                ((Button)RootGrid.Children[2])[!Button.CommandParameterProperty] = new IndexerBinding(RootGrid.Children[2], new StyledProperty<int>("CommandParameter", typeof(Button), new(i)), BindingMode.Default);
+                locGrids[gridIdx].IsVisible = true;
+                langBlocks[gridIdx].Text = langs[langIdx];
             }
         }
     }

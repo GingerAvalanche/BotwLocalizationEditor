@@ -3,6 +3,7 @@ using BotwLocalizationEditor.Interfaces;
 using BotwLocalizationEditor.Models;
 using BotwLocalizationEditor.Views;
 using ReactiveUI;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -45,9 +46,10 @@ namespace BotwLocalizationEditor.ViewModels
 
         public void OpenFolder(string folder)
         {
-            loadFolder = folder;
-            Title = $"BotwLocalizationEditor - {folder}";
-            LanguageModel model = new(folder);
+            string mod = Path.GetFileName(folder);
+            Title = $"BotwLocalizationEditor - {mod}";
+            loadFolder = $"{folder}/content/Pack";
+            LanguageModel model = new(loadFolder);
             foreach (UserControl languageControl in languageControls)
             {
                 ((IUpdatable)languageControl).Update(model.GetLangs());
@@ -77,6 +79,11 @@ namespace BotwLocalizationEditor.ViewModels
                 folder = loadFolder;
             }
             (SelectedLanguageControl.DataContext as LanguageViewModelBase)!.SaveFiles(folder);
+        }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ScanForMissing()
+        {
+            return ((LanguageViewModelBase)languageControls[0].DataContext!).ScanForMissing();
         }
     }
 }

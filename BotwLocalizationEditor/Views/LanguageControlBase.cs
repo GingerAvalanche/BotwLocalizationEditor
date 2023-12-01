@@ -1,4 +1,7 @@
 ﻿using Avalonia.Controls;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Enums;
 using BotwLocalizationEditor.ViewModels;
 
 namespace BotwLocalizationEditor.Views
@@ -7,45 +10,42 @@ namespace BotwLocalizationEditor.Views
     {
         protected async void AddMsbtButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var dialog = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxInputWindow(
-                new MessageBox.Avalonia.DTO.MessageBoxInputParams()
+            var dialog = MessageBoxManager.GetMessageBoxStandard(
+                new MessageBoxStandardParams()
                 {
                     ContentTitle = "New MSBT file",
                     ContentMessage = "Input the name of the MSBT file to add:",
-                    WatermarkText = "NameOfFile.msbt",
-                    ButtonDefinitions = new[]
-                    {
-                        new MessageBox.Avalonia.Models.ButtonDefinition() { IsDefault = true },
-                        new MessageBox.Avalonia.Models.ButtonDefinition() { Name = "Cancel", IsCancel = true },
+                    InputParams = new() {
+                        Label = "NameOfFile.msbt",
                     },
+                    ButtonDefinitions = ButtonEnum.OkCancel,
                 });
-            MessageBox.Avalonia.DTO.MessageWindowResultDTO result = await dialog.ShowDialog((Window)VisualRoot!);
-            if (result.Button == "Cancel")
+            var result = await dialog.ShowWindowDialogAsync((Window)VisualRoot!);
+            if (result == ButtonResult.Cancel)
             {
                 return;
             }
-            (DataContext as LanguageViewModelBase)!.AddMsbt(result.Message);
+            (DataContext as LanguageViewModelBase)!.AddMsbt(dialog.InputValue);
         }
         protected async void AddMsbtKeyButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var dialog = MessageBox.Avalonia.MessageBoxManager.GetMessageBoxInputWindow(
-                new MessageBox.Avalonia.DTO.MessageBoxInputParams()
+            var dialog = MessageBoxManager.GetMessageBoxStandard(
+                new MessageBoxStandardParams()
                 {
                     ContentTitle = "New MSBT key",
                     ContentMessage = "Input the name of the MSBT key to add:",
-                    WatermarkText = "Name_Of_Key",
-                    ButtonDefinitions = new[]
+                    InputParams = new()
                     {
-                        new MessageBox.Avalonia.Models.ButtonDefinition() { IsDefault = true },
-                        new MessageBox.Avalonia.Models.ButtonDefinition() { Name = "Cancel", IsCancel = true },
+                        Label = "Name_Of_Key",
                     },
+                    ButtonDefinitions = ButtonEnum.OkCancel,
                 });
-            MessageBox.Avalonia.DTO.MessageWindowResultDTO result = await dialog.ShowDialog((Window)VisualRoot!);
-            if (result.Button == "Cancel")
+            var result = await dialog.ShowWindowDialogAsync((Window)VisualRoot!);
+            if (result == ButtonResult.Cancel)
             {
                 return;
             }
-            (DataContext as LanguageViewModelBase)!.AddMsbtKey(result.Message);
+            (DataContext as LanguageViewModelBase)!.AddMsbtKey(dialog.InputValue);
         }
     }
 }

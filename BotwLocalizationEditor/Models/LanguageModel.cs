@@ -34,15 +34,15 @@ namespace BotwLocalizationEditor.Models
                 }
             }
         }
+        private string[]? langs;
+        public string[] GetLangs() => langs ??= msbts.Keys.ToArray();
+        private SortedSet<string>? sortedLangs;
+        public SortedSet<string> GetSortedLangs() => sortedLangs ??= new(GetLangs());
 
-        public string[] GetLangs()
-        {
-            return msbts.Keys.ToArray();
-        }
-        public SortedSet<string> GetMsbtFolders()
-        {
-            return new(msbts.First().Value.Keys); // folders are exe-specified, there are no custom ones
-        }
+        private string[]? msbtFolders;
+        public string[] GetMsbtFolders() => msbtFolders ??= msbts.First().Value.Keys.ToArray();
+        private SortedSet<string>? sortedMsbtFolders;
+        public SortedSet<string> GetSortedMsbtFolders() => sortedMsbtFolders ??= new(GetMsbtFolders());
 
         /*
          * One language
@@ -94,64 +94,6 @@ namespace BotwLocalizationEditor.Models
         public void SetOneLangMsbtValue(string lang, string msbtFolder, string msbtName, string key, string value)
         {
             msbts[lang][msbtFolder][msbtName][key].Value = value;
-        }
-
-        /*
-         * Two languages
-         */
-        public SortedSet<string> GetTwoLangsMsbtNames(string[] langs, string msbtFolder)
-        {
-            HashSet<string> names = new();
-            foreach (string lang in langs)
-            {
-                foreach (string key in msbts[lang][msbtFolder].Keys)
-                {
-                    names.Add(key);
-                }
-            }
-            return new(names);
-        }
-
-        public void AddMsbtTwoLangs(string[] langs, string msbtFolder, string msbtName)
-        {
-            AddMsbtOneLang(langs[0], msbtFolder, msbtName);
-            AddMsbtOneLang(langs[1], msbtFolder, msbtName);
-        }
-
-        public SortedSet<string> GetTwoLangsMsbtKeys(string[] langs, string msbtFolder, string msbtName)
-        {
-            HashSet<string> keys = new();
-            foreach (string lang in langs)
-            {
-                foreach (string key in msbts[lang][msbtFolder][msbtName].Keys)
-                {
-                    keys.Add(key);
-                }
-            }
-            return new(keys);
-        }
-
-        public void AddMsbtKeyTwoLangs(string[] langs, string msbtFolder, string msbtName, string key)
-        {
-            AddMsbtKeyOneLang(langs[0], msbtFolder, msbtName, key);
-            AddMsbtKeyOneLang(langs[1], msbtFolder, msbtName, key);
-        }
-
-        public Dictionary<string, string> GetTwoLangsMsbtValues(string[] langs, string msbtFolder, string msbtName, string key)
-        {
-            if (string.IsNullOrEmpty(key)) return new();
-            Dictionary<string, string> values = new();
-            values.TryAdd(langs[0], msbts[langs[0]][msbtFolder][msbtName][key].Value);
-            values.TryAdd(langs[1], msbts[langs[1]][msbtFolder][msbtName][key].Value);
-            return values;
-        }
-
-        public void SetTwoLangMsbtValues(string msbtFolder, string msbtName, string key, Dictionary<string, string> values)
-        {
-            foreach ((string lang, string value) in values)
-            {
-                msbts[lang][msbtFolder][msbtName][key].Value = value;
-            }
         }
 
         /*
@@ -236,8 +178,115 @@ namespace BotwLocalizationEditor.Models
                 SarcFile bootup = new(new(), endian);
                 bootup.Files[$"Message/Msg_{lang}.product.ssarc"] = Yaz0.Compress(msg.ToBinary());
 
-                File.WriteAllBytes($"{folder}/Bootup_{lang}.pack", bootup.ToBinary());
+                File.WriteAllBytes($"{folder}/content/Pack/Bootup_{lang}.pack", bootup.ToBinary());
             }
+        }
+
+        private Dictionary<string, Dictionary<string, HashSet<string>>> MergeAllLanguageFiles()
+        {
+            Dictionary<string, Dictionary<string, HashSet<string>>> allKeys = new();
+            foreach (var folderSet in msbts.Values)
+            {
+                foreach ((string folder, var fileSet) in folderSet)
+                {
+                    if (!allKeys.ContainsKey(folder))
+                    {
+                        allKeys[folder] = new();
+                    }
+                    foreach ((string file, var keySet) in fileSet)
+                    {
+                        if (!allKeys[folder].ContainsKey(file))
+                        {
+                            allKeys[folder][file] = new();
+                        }
+                        foreach ((string key, MsbtEntry value) in keySet)
+                        {
+                            if (!string.IsNullOrEmpty(value.Value))
+                            {
+                                allKeys[folder][file].Add(key);
+                            }
+                        }
+                    }
+                }
+            }
+            return allKeys;
+        }
+
+        /// <summary>
+        /// Finds all missing or empty keys from all languages. Something is defined as "missing" if even one other language has it.
+        /// </summary>
+        /// <returns>
+        /// Dictionary of lang, folder, file, key, bool, where the final bools are false if missing, true if empty
+        /// </returns>
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindMissing()
+        {
+            Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ret = new();
+            var allKeys = MergeAllLanguageFiles();
+
+            foreach ((string folder, var fileSet) in allKeys)
+            {
+                foreach ((string lang, var msbtSet) in msbts)
+                {
+                    if (!msbtSet.ContainsKey(folder))
+                    {
+                        if (!ret.ContainsKey(lang))
+                        {
+                            ret[lang] = new();
+                        }
+                        ret[lang][folder] = new();
+                        foreach ((string file, var keySet) in allKeys[folder])
+                        {
+                            ret[lang][folder][file] = keySet.ToDictionary(k => k, k => false);
+                        }
+                    }
+                    foreach ((string file, var keySet) in fileSet)
+                    {
+                        if (!msbtSet[folder].ContainsKey(file))
+                        {
+                            if (!ret.ContainsKey(lang))
+                            {
+                                ret[lang] = new();
+                            }
+                            if (!ret[lang].ContainsKey(folder))
+                            {
+                                ret[lang][folder] = new();
+                            }
+                            ret[lang][folder][file] = keySet.ToDictionary(k => k, k => false);
+                        }
+                        foreach (string key in keySet)
+                        {
+                            bool missing = false;
+                            bool missType = false;
+                            if (!msbtSet[folder][file].ContainsKey(key))
+                            {
+                                missing = true;
+                            }
+                            else if (string.IsNullOrEmpty(msbtSet[folder][file][key].Value))
+                            {
+                                missing = true;
+                                missType = true;
+                            }
+                            if (missing)
+                            {
+                                if (!ret.ContainsKey(lang))
+                                {
+                                    ret[lang] = new();
+                                }
+                                if (!ret[lang].ContainsKey(folder))
+                                {
+                                    ret[lang][folder] = new();
+                                }
+                                if (!ret[lang][folder].ContainsKey(file))
+                                {
+                                    ret[lang][folder][file] = new();
+                                }
+                                ret[lang][folder][file][key] = missType;
+                            }
+                        }
+                    }
+                }
+            }
+            return ret;
         }
     }
 }

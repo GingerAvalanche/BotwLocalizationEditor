@@ -1,12 +1,17 @@
-﻿using ReactiveUI;
+﻿using Avalonia.Controls;
+using BotwLocalizationEditor.Models;
+using BotwLocalizationEditor.Views;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 
 namespace BotwLocalizationEditor.ViewModels
 {
     public class DualLanguageViewModel : LanguageViewModelBase
     {
-        private readonly string[] chosenLangs = new string[2];
-        private readonly string[] locTexts = new string[2];
+        private readonly string[] chosenLangs;
+        private readonly string[] locTexts;
+        private readonly BrowserControl[] langBrowsers;
         public string Lang0
         {
             get => chosenLangs[0];
@@ -22,6 +27,7 @@ namespace BotwLocalizationEditor.ViewModels
                 }
             }
         }
+        public UserControl LangBrowser0 { get => langBrowsers[0]; set { this.RaiseAndSetIfChanged(ref langBrowsers[0], (BrowserControl)value); } }
         public string Lang1
         {
             get => chosenLangs[1];
@@ -37,6 +43,7 @@ namespace BotwLocalizationEditor.ViewModels
                 }
             }
         }
+        public UserControl LangBrowser1 { get => langBrowsers[1]; set { this.RaiseAndSetIfChanged(ref langBrowsers[1], (BrowserControl)value); } }
         public string LocText0
         {
             get => locTexts[0];
@@ -48,31 +55,57 @@ namespace BotwLocalizationEditor.ViewModels
             set => this.RaiseAndSetIfChanged(ref locTexts[1], value);
         }
 
-        public DualLanguageViewModel() : base() { }
-
-        protected override void OnLanguagesSet(string[] langs)
+        public DualLanguageViewModel() : base()
         {
-            string[] temp = new string[2];
-            temp[0] = langs[0];
-            temp[1] = langs[langs.Length < 2 ? 0 : 1];
-            this.RaiseAndSetIfChanged(ref chosenLangs[0], temp[0], nameof(Lang0));
-            this.RaiseAndSetIfChanged(ref chosenLangs[1], temp[1], nameof(Lang1));
-            base.OnLanguagesSet(langs);
+            chosenLangs = new string[2]
+            {
+                string.Empty,
+                string.Empty,
+            };
+            locTexts = new string[2]
+            {
+                string.Empty,
+                string.Empty,
+            };
+            langBrowsers = new BrowserControl[2]
+            {
+                new(Lang0_SelectionChanged),
+                new(Lang1_SelectionChanged),
+            };
+            langBrowsers[0].AddButton.IsVisible = false;
+            langBrowsers[1].AddButton.IsVisible = false;
+        }
+        protected void Lang0_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (sender != null && sender is ListBox box && box.SelectedItem != null)
+            {
+                Lang0 = (string)box.SelectedItem;
+            }
+        }
+        protected void Lang1_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (sender != null && sender is ListBox box && box.SelectedItem != null)
+            {
+                Lang1 = (string)box.SelectedItem;
+            }
+        }
+
+        public override void OnFolderChosen(LanguageModel languageModel)
+        {
+            SortedSet<string> sortedLangs = languageModel.GetSortedLangs();
+            langBrowsers[0].Items = sortedLangs;
+            langBrowsers[0].List.SelectedIndex = 0;
+            langBrowsers[1].Items = sortedLangs;
+            langBrowsers[1].List.SelectedIndex = sortedLangs.Count > 1 ? 1 : 0;
+            this.RaiseAndSetIfChanged(ref chosenLangs[0], (string)langBrowsers[0].List.SelectedItem!, nameof(Lang0));
+            this.RaiseAndSetIfChanged(ref chosenLangs[1], (string)langBrowsers[1].List.SelectedItem!, nameof(Lang1));
+            base.OnFolderChosen(languageModel);
         }
 
         protected override void OnKeyChanged(string key)
         {
-            Dictionary<string, string> newLocs = model.GetTwoLangsMsbtValues(chosenLangs, chosenMsbtFolder, chosenMsbtName, key);
-            if (newLocs.Count > 0)
-            {
-                LocText0 = newLocs[Lang0];
-                LocText1 = newLocs[Lang1];
-            }
-            else
-            {
-                LocText0 = "";
-                LocText1 = "";
-            }
+            LocText0 = model.GetOneLangMsbtValue(Lang0, chosenMsbtFolder, chosenMsbtName, key);
+            LocText1 = model.GetOneLangMsbtValue(Lang1, chosenMsbtFolder, chosenMsbtName, key);
         }
 
         internal void SaveLoc(int langNum)

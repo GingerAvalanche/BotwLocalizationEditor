@@ -7,9 +7,6 @@ namespace BotwLocalizationEditor.Views
         public DualLanguageControl()
         {
             InitializeComponent();
-
-            AddMsbtButton.Click += AddMsbtButton_Click;
-            AddMsbtKeyButton.Click += AddMsbtKeyButton_Click;
         }
 
         public void Update(string[] langs) { }

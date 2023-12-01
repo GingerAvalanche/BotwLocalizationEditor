@@ -1,115 +1,98 @@
-﻿using BotwLocalizationEditor.Models;
+﻿using Avalonia.Controls;
+using BotwLocalizationEditor.Models;
+using BotwLocalizationEditor.Views;
 using ReactiveUI;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BotwLocalizationEditor.ViewModels
 {
     public class LanguageViewModelBase : ViewModelBase
     {
         protected LanguageModel model;
-        protected string[] langs;
-        protected SortedSet<string> msbtFolders;
+        protected readonly BrowserControl[] browserControls;
+        protected BrowserControl selectedBrowserControl;
+        protected int selectedBrowserControlIndex;
         protected string chosenMsbtFolder;
-        protected SortedSet<string> msbtNames;
         protected string chosenMsbtName;
-        protected SortedSet<string> msbtKeys;
         protected string chosenMsbtKey;
         public string[] Languages
         {
-            get => langs;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref langs, value);
-                OnLanguagesSet(value);
-            }
+            get => model.GetLangs();
         }
         public SortedSet<string> MsbtFolders
         {
-            get => msbtFolders;
+            get => FolderBrowser.Items;
             set
             {
-                this.RaiseAndSetIfChanged(ref msbtFolders, value);
+                FolderBrowser.Items = value;
                 if (value.Count > 0)
                 {
-                    ChosenMsbtFolder = value.First();
-                }
-            }
-        }
-        public string ChosenMsbtFolder
-        {
-            get => chosenMsbtFolder;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref chosenMsbtFolder, value);
-                if (!string.IsNullOrEmpty(value))
-                {
-                    MsbtNames = model.GetAllLangsMsbtNames(value);
+                    ChosenMsbtFolder = FolderBrowser.Selected;
+                    MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
                 }
             }
         }
         public SortedSet<string> MsbtNames
         {
-            get => msbtNames;
+            get => MsbtBrowser.Items;
             set
             {
-                this.RaiseAndSetIfChanged(ref msbtNames, value);
+                MsbtBrowser.Items = value;
                 if (value.Count > 0)
                 {
-                    ChosenMsbtName = value.First();
+                    ChosenMsbtName = MsbtBrowser.Selected;
+                    MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
                 }
-            }
-        }
-        public string ChosenMsbtName
-        {
-            get => chosenMsbtName;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref chosenMsbtName, value);
-                if (!(string.IsNullOrEmpty(value) ||
-                    string.IsNullOrEmpty(chosenMsbtFolder)))
-                MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, value);
             }
         }
         public SortedSet<string> MsbtKeys
         {
-            get => msbtKeys;
+            get => KeyBrowser.Items;
             set
             {
-                this.RaiseAndSetIfChanged(ref msbtKeys, value);
-                if (value.Count > 0)
-                {
-                    ChosenMsbtKey = value.First();
-                }
+                KeyBrowser.Items = value;
+                ChosenMsbtKey = KeyBrowser.Selected;
+                OnKeyChanged(chosenMsbtKey);
             }
         }
-        public string ChosenMsbtKey
-        {
-            get => chosenMsbtKey;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref chosenMsbtKey, value);
-                OnKeyChanged(value);
-            }
-        }
+        public string ChosenMsbtFolder { get => chosenMsbtFolder; set => this.RaiseAndSetIfChanged(ref chosenMsbtFolder, value); }
+        public string ChosenMsbtName { get => chosenMsbtName; set => this.RaiseAndSetIfChanged(ref chosenMsbtName, value); }
+        public string ChosenMsbtKey { get => chosenMsbtKey; set => this.RaiseAndSetIfChanged(ref chosenMsbtKey, value); }
+        public UserControl SelectedBrowserControl { get => selectedBrowserControl; set { this.RaiseAndSetIfChanged(ref selectedBrowserControl, (BrowserControl)value); } }
+        public BrowserControl FolderBrowser => browserControls[0];
+        public BrowserControl MsbtBrowser => browserControls[1];
+        public BrowserControl KeyBrowser => browserControls[2];
+        public bool IsShowFolder { get => selectedBrowserControlIndex == 1; }
+        public bool IsShowMsbtName { get => selectedBrowserControlIndex == 2; }
+        public bool IsShowMsbtKey { get => selectedBrowserControlIndex == 3; }
 
         public LanguageViewModelBase()
         {
             model = new("");
-            langs = Array.Empty<string>();
-            msbtFolders = new();
-            chosenMsbtFolder = "";
-            msbtNames = new();
-            chosenMsbtName = "";
-            msbtKeys = new();
-            chosenMsbtKey = "";
+            chosenMsbtFolder = string.Empty;
+            chosenMsbtName = string.Empty;
+            chosenMsbtKey = string.Empty;
+
+            selectedBrowserControlIndex = 0;
+            browserControls = new BrowserControl[3];
+            browserControls[0] = new(MsbtFolder_SelectionChanged);
+            FolderBrowser.AddButton.IsVisible = false;
+            browserControls[1] = new(MsbtName_SelectionChanged);
+            MsbtBrowser.AddButton.Content = "Add MSBT";
+            browserControls[2] = new(MsbtKey_SelectionChanged);
+            KeyBrowser.AddButton.Content = "Add Key";
+            selectedBrowserControl = browserControls[selectedBrowserControlIndex];
         }
 
         public virtual void OnFolderChosen(LanguageModel languageModel)
         {
             model = languageModel;
-            Languages = model.GetLangs();
+            OnLanguagesSet(languageModel.GetLangs());
+        }
+
+        public void OnTabSelected(int tabNum)
+        {
+            SelectedBrowserControl = browserControls[tabNum];
         }
 
         public void SaveFiles(string folder)
@@ -131,8 +114,40 @@ namespace BotwLocalizationEditor.ViewModels
 
         protected virtual void OnLanguagesSet(string[] langs)
         {
-            MsbtFolders = model.GetMsbtFolders();
+            MsbtFolders = model.GetSortedMsbtFolders();
         }
         protected virtual void OnKeyChanged(string newKey) { }
+
+        private void MsbtFolder_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (sender != null && sender is ListBox box && box.SelectedItem != null)
+            {
+                ChosenMsbtFolder = (string)box.SelectedItem;
+                MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
+            }
+        }
+
+        private void MsbtName_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (sender != null && sender is ListBox box && box.SelectedItem != null)
+            {
+                ChosenMsbtName = (string)box.SelectedItem;
+                MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
+            }
+        }
+
+        private void MsbtKey_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+        {
+            if (sender != null && sender is ListBox box && box.SelectedItem != null)
+            {
+                ChosenMsbtKey = (string)box.SelectedItem;
+                OnKeyChanged(chosenMsbtKey);
+            }
+        }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ScanForMissing()
+        {
+            return model.FindMissing();
+        }
     }
 }
