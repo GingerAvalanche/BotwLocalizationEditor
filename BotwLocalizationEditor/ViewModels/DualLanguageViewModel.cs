@@ -2,7 +2,6 @@
 using BotwLocalizationEditor.Models;
 using BotwLocalizationEditor.Views;
 using ReactiveUI;
-using System;
 using System.Collections.Generic;
 
 namespace BotwLocalizationEditor.ViewModels

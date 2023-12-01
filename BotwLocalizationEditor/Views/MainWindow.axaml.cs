@@ -6,13 +6,9 @@ using BotwLocalizationEditor.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
-using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Tmds.DBus.Protocol;
 
 namespace BotwLocalizationEditor.Views
 {
