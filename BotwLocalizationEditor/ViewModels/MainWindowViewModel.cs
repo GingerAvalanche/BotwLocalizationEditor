@@ -23,7 +23,7 @@ namespace BotwLocalizationEditor.ViewModels
         public bool IsDualLanguage { get => languageSelector == 1; }
         public bool IsOmniLanguage { get => languageSelector == 2; }
 
-        public void OnLanguageSelected(int param)
+        public void OnLanguageModeSelected(int param)
         {
             languageSelector = param;
             SelectedLanguageControl = languageControls[param];

@@ -26,7 +26,7 @@
         <MenuItem Header="_Exit" Name="Exit"/>
       </MenuItem>
       <MenuItem Header="_Utilities">
-        <MenuItem Header="S_can for Missing/Empty Keys" Name="Scan"/>
+        <MenuItem Header="S_can for Missing/Empty Keys" Name="ScanMissingEmpty"/>
       </MenuItem>
       <MenuItem Header="_About" Name="About"/>
     </Menu>
@@ -37,7 +37,7 @@
                 HorizontalAlignment="Right">
       <RadioButton GroupName="Language Setting"
                     Content="One Language"
-                    Command="{Binding OnLanguageSelected}"
+                    Command="{Binding OnLanguageModeSelected}"
                     IsChecked="{Binding IsSingleLanguage}">
         <RadioButton.CommandParameter>
           <sys:Int32>0</sys:Int32>
@@ -46,7 +46,7 @@
       <Separator Width="10" Background="Transparent"/>
       <RadioButton GroupName="Language Setting"
                     Content="Two Languages"
-                    Command="{Binding OnLanguageSelected}"
+                    Command="{Binding OnLanguageModeSelected}"
                     IsChecked="{Binding IsDualLanguage}">
         <RadioButton.CommandParameter>
           <sys:Int32>1</sys:Int32>
@@ -55,7 +55,7 @@
       <Separator Width="10" Background="Transparent"/>
       <RadioButton GroupName="Language Setting"
                     Content="All Languages"
-                    Command="{Binding OnLanguageSelected}"
+                    Command="{Binding OnLanguageModeSelected}"
                     IsChecked="{Binding IsOmniLanguage}">
         <RadioButton.CommandParameter>
           <sys:Int32>2</sys:Int32>

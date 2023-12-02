@@ -22,7 +22,7 @@ namespace BotwLocalizationEditor.Views
             Save.Click += Save_Click;
             SaveAs.Click += SaveAs_Click;
             Exit.Click += Exit_Click;
-            Scan.Click += Scan_Click;
+            ScanMissingEmpty.Click += ScanMissingEmpty_Click;
             About.Click += About_Click;
         }
 
@@ -85,7 +85,7 @@ namespace BotwLocalizationEditor.Views
             }
         }
 
-        private void Scan_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private void ScanMissingEmpty_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             var missing = vm.ScanForMissing();
