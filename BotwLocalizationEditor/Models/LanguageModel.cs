@@ -178,7 +178,7 @@ namespace BotwLocalizationEditor.Models
                 SarcFile bootup = new(new(), endian);
                 bootup.Files[$"Message/Msg_{lang}.product.ssarc"] = Yaz0.Compress(msg.ToBinary());
 
-                File.WriteAllBytes($"{folder}/content/Pack/Bootup_{lang}.pack", bootup.ToBinary());
+                File.WriteAllBytes($"{folder}/Bootup_{lang}.pack", bootup.ToBinary());
             }
         }
 

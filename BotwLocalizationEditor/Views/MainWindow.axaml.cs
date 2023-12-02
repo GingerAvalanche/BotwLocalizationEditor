@@ -56,9 +56,9 @@ namespace BotwLocalizationEditor.Views
                         AllowMultiple = false,
                     }
                 ))[0];
-            string folder = System.Uri.UnescapeDataString(maybeFolder.Path.AbsolutePath);
+            string folder = Path.Combine(System.Uri.UnescapeDataString(maybeFolder.Path.AbsolutePath), "content", "Pack");
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
-            if (vm.WillSaveOverwriteFile(Path.Combine(folder, "content", "Pack")))
+            if (vm.WillSaveOverwriteFile(folder))
             {
                 var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
                     new MessageBoxStandardParams()
