@@ -60,6 +60,11 @@ namespace BotwLocalizationEditor.ViewModels
         public bool WillSaveOverwriteFile(string folder)
         {
             LanguageViewModelBase vm = (SelectedLanguageControl.DataContext as LanguageViewModelBase)!;
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+                return false;
+            }
             string[] existingFiles = Directory.GetFiles(folder);
             foreach (string lang in vm.Languages)
             {
