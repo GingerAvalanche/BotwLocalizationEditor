@@ -85,7 +85,7 @@ namespace BotwLocalizationEditor.Views
             }
         }
 
-        private void ScanMissingEmpty_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void ScanMissingEmpty_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             var missing = vm.ScanForMissing();
@@ -98,7 +98,7 @@ namespace BotwLocalizationEditor.Views
             {
                 message = string.Join("\n", missing.Select(l => $"{l.Key}:\n\t{string.Join("\n\t", l.Value.Select(f => $"{f.Key}\n\t\t{string.Join("\n\t\t", f.Value.Select(fi => $"{fi.Key}\n\t\t\t{string.Join("\n\t\t\t", fi.Value.Keys.ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet());
             }
-            MessageBoxManager.GetMessageBoxStandard(
+            await MessageBoxManager.GetMessageBoxStandard(
                 new MessageBoxStandardParams()
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
@@ -112,14 +112,14 @@ namespace BotwLocalizationEditor.Views
                 }).ShowWindowDialogAsync(this);
         }
 
-        private void About_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void About_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             string message;
             using (var streamReader = new StreamReader(AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/about.md"))))
             {
                 message = streamReader.ReadToEnd();
             }
-            MessageBoxManager.GetMessageBoxStandard(
+            await MessageBoxManager.GetMessageBoxStandard(
                 new MessageBoxStandardParams()
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
