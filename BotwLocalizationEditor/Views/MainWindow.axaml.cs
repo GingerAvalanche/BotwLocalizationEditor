@@ -16,6 +16,8 @@ namespace BotwLocalizationEditor.Views
     {
         public MainWindow()
         {
+            SettingsViewModel.InitSettingsFile();
+
             InitializeComponent();
 
             Open.Click += Open_Click;
