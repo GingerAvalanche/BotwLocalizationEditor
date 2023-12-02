@@ -103,7 +103,7 @@ namespace BotwLocalizationEditor.Views
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
                     ContentTitle = "Scan for Missing/Empty Keys",
-                    ContentHeader = "Missing Keys:",
+                    ContentHeader = "These keys are either missing from the given language, or they contain no text for that language:",
                     ContentMessage = message,
                     MaxHeight = 800,
                     Width = 400,
