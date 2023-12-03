@@ -28,7 +28,8 @@
         <MenuItem Header="_Exit" Name="Exit"/>
       </MenuItem>
       <MenuItem Header="_Utilities">
-        <MenuItem Header="S_can for Missing/Empty Keys" Name="ScanMissingEmpty"/>
+        <MenuItem Header="Scan for _Missing/Empty Keys" Name="ScanMissingEmpty"/>
+        <MenuItem Header="Scan for _New Keys" Name="ScanNew"/>
       </MenuItem>
       <MenuItem Header="_About" Name="About"/>
     </Menu>

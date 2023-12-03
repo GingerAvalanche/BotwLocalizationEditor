@@ -1,4 +1,5 @@
-﻿using MsbtLib;
+﻿using BotwLocalizationEditor.ViewModels;
+using MsbtLib;
 using Nintendo.Sarc;
 using Syroot.BinaryData.Core;
 using System.Collections.Generic;
@@ -220,8 +221,12 @@ namespace BotwLocalizationEditor.Models
         /// </returns>
         public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindMissing()
         {
+            return FindMissing(MergeAllLanguageFiles());
+        }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindMissing(Dictionary<string, Dictionary<string, HashSet<string>>> allKeys)
+        {
             Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ret = new();
-            var allKeys = MergeAllLanguageFiles();
 
             foreach ((string folder, var fileSet) in allKeys)
             {
@@ -287,6 +292,12 @@ namespace BotwLocalizationEditor.Models
                 }
             }
             return ret;
+        }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindNew()
+        {
+            LanguageModel vanilla = new(Path.Combine(SettingsViewModel.GetDumpPath(), "content", "Pack"));
+            return vanilla.FindMissing(MergeAllLanguageFiles());
         }
     }
 }

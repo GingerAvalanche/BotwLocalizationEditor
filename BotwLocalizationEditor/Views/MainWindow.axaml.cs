@@ -25,6 +25,7 @@ namespace BotwLocalizationEditor.Views
             SaveAs.Click += SaveAs_Click;
             Settings.Click += Settings_Click;
             Exit.Click += Exit_Click;
+            ScanNew.Click += ScanNew_Click;
             ScanMissingEmpty.Click += ScanMissingEmpty_Click;
             About.Click += About_Click;
         }
@@ -36,14 +37,18 @@ namespace BotwLocalizationEditor.Views
 
         private async void Open_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            IStorageFolder maybeFolder = (await StorageProvider.OpenFolderPickerAsync(
+            var selection = (await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
-                ))[0];
-            string folder = System.Uri.UnescapeDataString(maybeFolder.Path.AbsolutePath);
+                ));
+            if (selection.Count != 1)
+            {
+                return;
+            }
+            string folder = System.Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
             if (!string.IsNullOrEmpty(folder))
             {
                 (DataContext as MainWindowViewModel)!.OpenFolder(folder);
@@ -57,14 +62,18 @@ namespace BotwLocalizationEditor.Views
 
         private async void SaveAs_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            IStorageFolder maybeFolder = (await StorageProvider.OpenFolderPickerAsync(
+            var selection = (await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
-                ))[0];
-            string folder = Path.Combine(System.Uri.UnescapeDataString(maybeFolder.Path.AbsolutePath), "content", "Pack");
+                ));
+            if (selection.Count != 1)
+            {
+                return;
+            }
+            string folder = Path.Combine(System.Uri.UnescapeDataString(selection[0].Path.AbsolutePath), "content", "Pack");
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             if (vm.WillSaveOverwriteFile(folder))
             {
@@ -112,6 +121,33 @@ namespace BotwLocalizationEditor.Views
                     ButtonDefinitions = ButtonEnum.Ok,
                     ContentTitle = "Scan for Missing/Empty Keys",
                     ContentHeader = "These keys are either missing from the given language, or they contain no text for that language:",
+                    ContentMessage = message,
+                    MaxHeight = 800,
+                    Width = 400,
+                    WindowIcon = new("Assets/icon.png"),
+                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                }).ShowWindowDialogAsync(this);
+        }
+
+        private async void ScanNew_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
+            var missing = vm.ScanForMissing();
+            string message;
+            if (missing.Count == 0)
+            {
+                message = "No new keys!";
+            }
+            else
+            {
+                message = string.Join("\n", missing.Select(l => $"{l.Key}:\n\t{string.Join("\n\t", l.Value.Select(f => $"{f.Key}\n\t\t{string.Join("\n\t\t", f.Value.Select(fi => $"{fi.Key}\n\t\t\t{string.Join("\n\t\t\t", fi.Value.Keys.ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet());
+            }
+            await MessageBoxManager.GetMessageBoxStandard(
+                new MessageBoxStandardParams()
+                {
+                    ButtonDefinitions = ButtonEnum.Ok,
+                    ContentTitle = "Scan for New Keys",
+                    ContentHeader = "These keys are new in your mod:",
                     ContentMessage = message,
                     MaxHeight = 800,
                     Width = 400,

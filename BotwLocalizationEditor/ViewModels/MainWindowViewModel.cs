@@ -90,5 +90,10 @@ namespace BotwLocalizationEditor.ViewModels
         {
             return ((LanguageViewModelBase)languageControls[0].DataContext!).ScanForMissing();
         }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ScanForNew()
+        {
+            return ((LanguageViewModelBase)languageControls[0].DataContext!).ScanForNew();
+        }
     }
 }

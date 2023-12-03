@@ -45,14 +45,18 @@ namespace BotwLocalizationEditor.Views
 
         private async void BrowseButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            IStorageFolder maybeFolder = (await StorageProvider.OpenFolderPickerAsync(
+            var selection = (await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
-                        Title = "Select the root folder of your game dump",
+                        Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
-                ))[0];
-            string folder = System.Uri.UnescapeDataString(maybeFolder.Path.AbsolutePath);
+                ));
+            if (selection.Count != 1)
+            {
+                return;
+            }
+            string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
             ((SettingsViewModel)DataContext!).DumpPath = folder;
         }
 

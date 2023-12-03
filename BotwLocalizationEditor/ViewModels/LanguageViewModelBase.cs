@@ -149,5 +149,10 @@ namespace BotwLocalizationEditor.ViewModels
         {
             return model.FindMissing();
         }
+
+        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ScanForNew()
+        {
+            return model.FindNew();
+        }
     }
 }
