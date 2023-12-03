@@ -2,9 +2,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         xmlns:vm="using:BotwLocalizationEditor.ViewModels"
         xmlns:sys="using:System"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="BotwLocalizationEditor.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         x:CompileBindings="True"
@@ -22,6 +22,8 @@
         <Separator/>
         <MenuItem Header="_Save" Name="Save"/>
         <MenuItem Header="Save _As..." Name="SaveAs"/>
+        <Separator/>
+        <MenuItem Header="S_ettings" Name="Settings"/>
         <Separator/>
         <MenuItem Header="_Exit" Name="Exit"/>
       </MenuItem>

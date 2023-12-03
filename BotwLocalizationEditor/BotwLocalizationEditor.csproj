@@ -11,7 +11,9 @@
     <AvaloniaResource Include="Assets\**" />
     <None Remove=".gitignore" />
     <None Remove="Assets\about.md" />
+    <None Remove="Assets\checkmark.png" />
     <None Remove="Assets\donate.png" />
+    <None Remove="Assets\red_x.png" />
   </ItemGroup>
   <ItemGroup>
     <!--This helps with theme dll-s trimming.

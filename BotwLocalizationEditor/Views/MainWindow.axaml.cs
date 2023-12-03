@@ -23,9 +23,15 @@ namespace BotwLocalizationEditor.Views
             Open.Click += Open_Click;
             Save.Click += Save_Click;
             SaveAs.Click += SaveAs_Click;
+            Settings.Click += Settings_Click;
             Exit.Click += Exit_Click;
             ScanMissingEmpty.Click += ScanMissingEmpty_Click;
             About.Click += About_Click;
+        }
+
+        private async void Settings_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            await new SettingsWindow().ShowDialog(this);
         }
 
         private async void Open_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
