@@ -294,10 +294,10 @@ namespace BotwLocalizationEditor.Models
             return ret;
         }
 
-        public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindNew()
+        public Dictionary<string, Dictionary<string, Dictionary<string, bool>>> FindNew()
         {
             LanguageModel vanilla = new(Path.Combine(SettingsViewModel.GetDumpPath(), "content", "Pack"));
-            return vanilla.FindMissing(MergeAllLanguageFiles());
+            return vanilla.FindMissing(MergeAllLanguageFiles()).First().Value;
         }
     }
 }
