@@ -10,10 +10,10 @@ namespace BotwLocalizationEditor.Views
     {
         public SettingsWindow()
         {
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            InitializeComponent();
-
             DataContext = new SettingsViewModel();
+            WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+            InitializeComponent();
 
             DumpBox.TextChanged += DumpBox_TextChanged;
             BrowseButton.Click += BrowseButton_Click;
