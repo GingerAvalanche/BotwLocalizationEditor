@@ -7,23 +7,23 @@ namespace BotwLocalizationEditor.ViewModels
 {
     public class OmniLanguageViewModel : LanguageViewModelBase
     {
-        public TextBox[] langBoxes = new TextBox[16];
+        public readonly TextBox[] LangBoxes = new TextBox[16];
 
         protected override void OnKeyChanged(string key)
         {
-            Dictionary<string, string> newLocs = model.GetAllLangsMsbtValues(chosenMsbtFolder, chosenMsbtName, key);
+            Dictionary<string, string> newLocs = Model.GetAllLangsMsbtValues(ChosenMsbtFolder, ChosenMsbtName, key);
             foreach ((int langIdx, int gridIdx) in GridIndices(Languages.Length))
             {
-                langBoxes[gridIdx].Text = newLocs[Languages[langIdx]];
+                LangBoxes[gridIdx].Text = newLocs[Languages[langIdx]];
             }
         }
 
         internal void SaveLoc(int langNum)
         {
-            model.SetOneLangMsbtValue(Languages[langNum], chosenMsbtFolder, chosenMsbtName, chosenMsbtKey, langBoxes[langNum].Text!);
+            Model.SetOneLangMsbtValue(Languages[langNum], ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey, LangBoxes[langNum].Text!);
         }
 
-        // I really wish Avalonia wasn't dumbtarded when it came to binding things to TextBoxes
+        // I really wish Avalonia wasn't dumb when it came to binding things to TextBoxes
         // It would be great if I didn't need to do all this manually!
         public static (int, int)[] GridIndices(int numLanguages)
         {

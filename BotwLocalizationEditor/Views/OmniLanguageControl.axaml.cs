@@ -28,7 +28,7 @@ namespace BotwLocalizationEditor.Views
                     {
                         if (child2 is TextBox box)
                         {
-                            vm.langBoxes[gridNum] = box;
+                            vm.LangBoxes[gridNum] = box;
                         }
                         if (child2 is TextBlock block)
                         {

@@ -17,15 +17,16 @@ namespace BotwLocalizationEditor.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref chosenLanguage, value);
                 if (!(string.IsNullOrEmpty(value) ||
-                    string.IsNullOrEmpty(chosenMsbtFolder) ||
-                    string.IsNullOrEmpty(chosenMsbtName) ||
-                    string.IsNullOrEmpty(chosenMsbtKey)))
+                    string.IsNullOrEmpty(ChosenMsbtFolder) ||
+                    string.IsNullOrEmpty(ChosenMsbtName) ||
+                    string.IsNullOrEmpty(ChosenMsbtKey)))
                 {
-                    LocText = model.GetOneLangMsbtValue(value, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey);
+                    LocText = Model.GetOneLangMsbtValue(value, ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey);
                 }
             }
         }
-        public BrowserControl LanguageBrowser { get; }
+
+        private BrowserControl LanguageBrowser { get; }
 
         public SingleLanguageViewModel()
         {
@@ -66,12 +67,12 @@ namespace BotwLocalizationEditor.ViewModels
 
         protected override void OnKeyChanged(string key)
         {
-            LocText = model.GetOneLangMsbtValue(chosenLanguage, chosenMsbtFolder, chosenMsbtName, key);
+            LocText = Model.GetOneLangMsbtValue(chosenLanguage, ChosenMsbtFolder, ChosenMsbtName, key);
         }
 
         internal void SaveLoc()
         {
-            model.SetOneLangMsbtValue(chosenLanguage, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey, locText);
+            Model.SetOneLangMsbtValue(chosenLanguage, ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey, locText);
         }
     }
 }

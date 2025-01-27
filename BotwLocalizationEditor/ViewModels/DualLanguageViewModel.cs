@@ -8,21 +8,21 @@ namespace BotwLocalizationEditor.ViewModels
 {
     public class DualLanguageViewModel : LanguageViewModelBase
     {
-        private readonly string[] chosenLangs;
+        private readonly string[] chosenLanguages;
         private readonly string[] locTexts;
         private readonly BrowserControl[] langBrowsers;
         public string Lang0
         {
-            get => chosenLangs[0];
+            get => chosenLanguages[0];
             set
             {
-                this.RaiseAndSetIfChanged(ref chosenLangs[0], value);
+                this.RaiseAndSetIfChanged(ref chosenLanguages[0], value);
                 if (!(string.IsNullOrEmpty(value) ||
-                    string.IsNullOrEmpty(chosenMsbtFolder) ||
-                    string.IsNullOrEmpty(chosenMsbtName) ||
-                    string.IsNullOrEmpty(chosenMsbtKey)))
+                    string.IsNullOrEmpty(ChosenMsbtFolder) ||
+                    string.IsNullOrEmpty(ChosenMsbtName) ||
+                    string.IsNullOrEmpty(ChosenMsbtKey)))
                 {
-                    LocText0 = model.GetOneLangMsbtValue(value, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey);
+                    LocText0 = Model.GetOneLangMsbtValue(value, ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey);
                 }
             }
         }
@@ -34,16 +34,16 @@ namespace BotwLocalizationEditor.ViewModels
         }
         public string Lang1
         {
-            get => chosenLangs[1];
+            get => chosenLanguages[1];
             set
             {
-                this.RaiseAndSetIfChanged(ref chosenLangs[1], value);
+                this.RaiseAndSetIfChanged(ref chosenLanguages[1], value);
                 if (!(string.IsNullOrEmpty(value) ||
-                    string.IsNullOrEmpty(chosenMsbtFolder) ||
-                    string.IsNullOrEmpty(chosenMsbtName) ||
-                    string.IsNullOrEmpty(chosenMsbtKey)))
+                    string.IsNullOrEmpty(ChosenMsbtFolder) ||
+                    string.IsNullOrEmpty(ChosenMsbtName) ||
+                    string.IsNullOrEmpty(ChosenMsbtKey)))
                 {
-                    LocText1 = model.GetOneLangMsbtValue(value, chosenMsbtFolder, chosenMsbtName, chosenMsbtKey);
+                    LocText1 = Model.GetOneLangMsbtValue(value, ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey);
                 }
             }
         }
@@ -66,7 +66,7 @@ namespace BotwLocalizationEditor.ViewModels
 
         public DualLanguageViewModel()
         {
-            chosenLangs =
+            chosenLanguages =
             [
                 string.Empty,
                 string.Empty,
@@ -84,14 +84,16 @@ namespace BotwLocalizationEditor.ViewModels
             langBrowsers[0].AddButton.IsVisible = false;
             langBrowsers[1].AddButton.IsVisible = false;
         }
-        protected void Lang0_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+
+        private void Lang0_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (sender is ListBox { SelectedItem: not null } box)
             {
                 Lang0 = (string)box.SelectedItem;
             }
         }
-        protected void Lang1_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+
+        private void Lang1_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (sender is ListBox { SelectedItem: not null } box)
             {
@@ -101,25 +103,25 @@ namespace BotwLocalizationEditor.ViewModels
 
         public override void OnFolderChosen(LanguageModel languageModel)
         {
-            SortedSet<string> sortedLangs = languageModel.GetSortedLangs();
-            langBrowsers[0].Items = sortedLangs;
+            SortedSet<string> sortedLanguages = languageModel.GetSortedLangs();
+            langBrowsers[0].Items = sortedLanguages;
             langBrowsers[0].ItemList.SelectedIndex = 0;
-            langBrowsers[1].Items = sortedLangs;
-            langBrowsers[1].ItemList.SelectedIndex = sortedLangs.Count > 1 ? 1 : 0;
-            this.RaiseAndSetIfChanged(ref chosenLangs[0], (string)langBrowsers[0].ItemList.SelectedItem!, nameof(Lang0));
-            this.RaiseAndSetIfChanged(ref chosenLangs[1], (string)langBrowsers[1].ItemList.SelectedItem!, nameof(Lang1));
+            langBrowsers[1].Items = sortedLanguages;
+            langBrowsers[1].ItemList.SelectedIndex = sortedLanguages.Count > 1 ? 1 : 0;
+            this.RaiseAndSetIfChanged(ref chosenLanguages[0], (string)langBrowsers[0].ItemList.SelectedItem!, nameof(Lang0));
+            this.RaiseAndSetIfChanged(ref chosenLanguages[1], (string)langBrowsers[1].ItemList.SelectedItem!, nameof(Lang1));
             base.OnFolderChosen(languageModel);
         }
 
         protected override void OnKeyChanged(string key)
         {
-            LocText0 = model.GetOneLangMsbtValue(Lang0, chosenMsbtFolder, chosenMsbtName, key);
-            LocText1 = model.GetOneLangMsbtValue(Lang1, chosenMsbtFolder, chosenMsbtName, key);
+            LocText0 = Model.GetOneLangMsbtValue(Lang0, ChosenMsbtFolder, ChosenMsbtName, key);
+            LocText1 = Model.GetOneLangMsbtValue(Lang1, ChosenMsbtFolder, ChosenMsbtName, key);
         }
 
         internal void SaveLoc(int langNum)
         {
-            model.SetOneLangMsbtValue(chosenLangs[langNum], chosenMsbtFolder, chosenMsbtName, chosenMsbtKey, locTexts[langNum]);
+            Model.SetOneLangMsbtValue(chosenLanguages[langNum], ChosenMsbtFolder, ChosenMsbtName, ChosenMsbtKey, locTexts[langNum]);
         }
     }
 }
