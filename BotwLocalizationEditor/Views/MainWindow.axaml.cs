@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform;
-using Avalonia.Platform.Storage;
 using BotwLocalizationEditor.ViewModels;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -37,21 +37,33 @@ namespace BotwLocalizationEditor.Views
 
         private async void Open_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var selection = (await StorageProvider.OpenFolderPickerAsync(
+            var selection = await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
-                ));
+                );
             if (selection.Count != 1)
             {
                 return;
             }
-            string folder = System.Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
-            if (!string.IsNullOrEmpty(folder))
+            string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
+            if (string.IsNullOrEmpty(folder)) return;
+            (DataContext as MainWindowViewModel)!.OpenFolder(folder)
+                .Deconstruct(out _, out _, out Exception? ex);
+            if (ex != null)
             {
-                (DataContext as MainWindowViewModel)!.OpenFolder(folder);
+                await MessageBoxManager.GetMessageBoxStandard(
+                    new MessageBoxStandardParams()
+                    {
+                        ButtonDefinitions = ButtonEnum.Ok,
+                        ContentTitle = "Error",
+                        ContentMessage = ex.Message,
+                        MaxHeight = 800,
+                        Width = 500,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    }).ShowWindowDialogAsync(this);
             }
         }
 
@@ -62,18 +74,18 @@ namespace BotwLocalizationEditor.Views
 
         private async void SaveAs_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var selection = (await StorageProvider.OpenFolderPickerAsync(
+            var selection = await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
-                ));
+                );
             if (selection.Count != 1)
             {
                 return;
             }
-            string folder = Path.Combine(System.Uri.UnescapeDataString(selection[0].Path.AbsolutePath), "content", "Pack");
+            string folder = Path.Combine(Uri.UnescapeDataString(selection[0].Path.AbsolutePath), "content", "Pack");
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             if (vm.WillSaveOverwriteFile(folder))
             {
@@ -107,13 +119,37 @@ namespace BotwLocalizationEditor.Views
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             var missing = vm.ScanForMissing();
             string message;
+            WindowIcon icon;
             if (missing.Count == 0)
             {
                 message = "None missing!";
             }
             else
             {
-                message = string.Join("\n", missing.Select(l => $"{l.Key}:\n\t{string.Join("\n\t", l.Value.Select(f => $"{f.Key}:\n\t\t{string.Join("\n\t\t", f.Value.Select(fi => $"{fi.Key}:\n\t\t\t{string.Join("\n\t\t\t", fi.Value.Keys.ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet());
+                message = string.Join(
+                    "\n",
+                    missing.Select(
+                            l => $"{l.Key}:\n\t{string.Join(
+                                "\n\t",
+                                l.Value.Select(
+                                    f => $"{f.Key}:\n\t\t{string.Join(
+                                        "\n\t\t",
+                                        f.Value.Select(
+                                            fi => $"{fi.Key}:\n\t\t\t{string.Join(
+                                                "\n\t\t\t",
+                                                fi.Value.Keys.ToImmutableSortedSet()
+                                            )}"
+                                        ).ToImmutableSortedSet()
+                                    )}"
+                                ).ToImmutableSortedSet()
+                            )}"
+                        ).ToImmutableSortedSet()
+                );
+            }
+
+            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
+            {
+                icon = new(streamReader);
             }
             await MessageBoxManager.GetMessageBoxStandard(
                 new MessageBoxStandardParams()
@@ -124,7 +160,7 @@ namespace BotwLocalizationEditor.Views
                     ContentMessage = message,
                     MaxHeight = 800,
                     Width = 400,
-                    WindowIcon = new("Assets/icon.png"),
+                    WindowIcon = icon,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 }).ShowWindowDialogAsync(this);
         }
@@ -134,13 +170,32 @@ namespace BotwLocalizationEditor.Views
             MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
             var missing = vm.ScanForNew();
             string message;
+            WindowIcon icon;
             if (missing.Count == 0)
             {
                 message = "No new keys!";
             }
             else
             {
-                message = string.Join("\n", missing.Select(f => $"{f.Key}:\n\t{string.Join("\n\t", f.Value.Select(fi => $"{fi.Key}:\n\t\t{string.Join("\n\t\t", fi.Value.Keys.ToImmutableSortedSet())}").ToImmutableSortedSet())}").ToImmutableSortedSet());
+                message = string.Join(
+                    "\n",
+                    missing.Select(
+                        f => $"{f.Key}:\n\t{string.Join(
+                            "\n\t",
+                            f.Value.Select(
+                                fi => $"{fi.Key}:\n\t\t{string.Join(
+                                    "\n\t\t",
+                                    fi.Value.Keys.ToImmutableSortedSet()
+                                )}"
+                            ).ToImmutableSortedSet()
+                        )}"
+                    ).ToImmutableSortedSet()
+                );
+            }
+
+            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
+            {
+                icon = new(streamReader);
             }
             await MessageBoxManager.GetMessageBoxStandard(
                 new MessageBoxStandardParams()
@@ -151,7 +206,7 @@ namespace BotwLocalizationEditor.Views
                     ContentMessage = message,
                     MaxHeight = 800,
                     Width = 400,
-                    WindowIcon = new("Assets/icon.png"),
+                    WindowIcon = icon,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 }).ShowWindowDialogAsync(this);
         }
@@ -159,9 +214,15 @@ namespace BotwLocalizationEditor.Views
         private async void About_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             string message;
+            WindowIcon icon;
             using (var streamReader = new StreamReader(AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/about.md"))))
             {
-                message = streamReader.ReadToEnd();
+                message = await streamReader.ReadToEndAsync();
+            }
+
+            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
+            {
+                icon = new(streamReader);
             }
             await MessageBoxManager.GetMessageBoxStandard(
                 new MessageBoxStandardParams()
@@ -172,7 +233,7 @@ namespace BotwLocalizationEditor.Views
                     Markdown = true,
                     MaxHeight = 800,
                     Width = 500,
-                    WindowIcon = new("Assets/icon.png"),
+                    WindowIcon = icon,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 }).ShowWindowDialogAsync(this);
         }

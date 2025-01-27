@@ -15,10 +15,10 @@ namespace BotwLocalizationEditor.Views
         {
             InitializeComponent();
 
-            List.SelectionChanged += selectionFunc;
+            ItemList.SelectionChanged += selectionFunc;
 
             TextBox searchField = this.FindControl<TextBox>("Filter")!;
-            searchField.AttachedToVisualTree += (s, e) => searchField.Focus();
+            searchField.AttachedToVisualTree += (_, _) => searchField.Focus();
         }
 
         public SortedSet<string> Items

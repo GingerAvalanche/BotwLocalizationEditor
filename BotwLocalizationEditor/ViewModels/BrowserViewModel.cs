@@ -6,7 +6,7 @@ namespace BotwLocalizationEditor.ViewModels
 {
     public class BrowserViewModel : ViewModelBase
     {
-        private SortedSet<string> baseItems = new();
+        private SortedSet<string> baseItems = [];
         public SortedSet<string> BaseItems
         {
             get => baseItems;
@@ -17,7 +17,7 @@ namespace BotwLocalizationEditor.ViewModels
             }
         }
 
-        private SortedSet<string> items = new();
+        private SortedSet<string> items = [];
         public SortedSet<string> Items
         {
             get => items;
@@ -40,7 +40,7 @@ namespace BotwLocalizationEditor.ViewModels
                 this.RaiseAndSetIfChanged(ref filter, value);
 
                 Items = string.IsNullOrEmpty(filter) ? baseItems :
-                    new(baseItems.Where(s => s.ToLower().Contains(filter.ToLower())));
+                    [.. baseItems.Where(s => s.ToLower().Contains(filter.ToLower()))];
                 Selected = items.Count > 0 ? items.First() : "";
             }
         }

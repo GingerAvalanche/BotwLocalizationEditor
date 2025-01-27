@@ -1,11 +1,13 @@
 ﻿using BotwLocalizationEditor.ViewModels;
 using MsbtLib;
-using Nintendo.Sarc;
-using Syroot.BinaryData.Core;
+using Revrs;
+using SarcLibrary;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Yaz0Library;
+using CsYaz0;
+using Endianness = Revrs.Endianness;
 
 namespace BotwLocalizationEditor.Models
 {
@@ -15,56 +17,65 @@ namespace BotwLocalizationEditor.Models
 
         public LanguageModel(string folder)
         {
-            msbts = new();
+            msbts = [];
 
             if (string.IsNullOrEmpty(folder))
             {
                 return;
             }
+            
+            Endianness endianness = folder.Contains("romfs") ? Endianness.Little : Endianness.Big;
 
             foreach (string file in Directory.GetFiles(folder, "Bootup_????.pack"))
             {
                 string name = Path.GetFileNameWithoutExtension(file)[7..];
-                msbts[name] = new();
-                SarcFile msg = new(Yaz0.Decompress(new SarcFile(file).Files[$"Message/Msg_{name}.product.ssarc"]));
-                foreach ((string msbtname, byte[] data) in msg.Files)
+                msbts[name] = [];
+                RevrsReader reader = new(File.ReadAllBytes(file), endianness);
+                ImmutableSarc sarc = new(ref reader);
+                RevrsReader reader1 = new(Yaz0.Decompress(sarc[$"Message/Msg_{name}.product.ssarc"].Data), endianness);
+                ImmutableSarc msg = new(ref reader1);
+                foreach ((string msbtname, Span<byte> data) in msg)
                 {
                     string[] path = msbtname.Split('/');
-                    msbts[name].TryAdd(path[0], new());
-                    msbts[name][path[0]][path[1]] = new MSBT(data).GetTexts();
+                    msbts[name].TryAdd(path[0], []);
+                    msbts[name][path[0]][path[1]] = new MSBT(data.ToArray()).GetTexts();
                 }
             }
         }
         private string[]? langs;
-        public string[] GetLangs() => langs ??= msbts.Keys.ToArray();
+        public string[] GetLangs() => langs ??= [.. msbts.Keys];
         private SortedSet<string>? sortedLangs;
-        public SortedSet<string> GetSortedLangs() => sortedLangs ??= new(GetLangs());
+        public SortedSet<string> GetSortedLangs() => sortedLangs ??= [.. GetLangs()];
 
         private string[]? msbtFolders;
-        public string[] GetMsbtFolders() => msbtFolders ??= msbts.First().Value.Keys.ToArray();
+        public string[] GetMsbtFolders() => msbtFolders ??= [.. msbts.First().Value.Keys];
         private SortedSet<string>? sortedMsbtFolders;
-        public SortedSet<string> GetSortedMsbtFolders() => sortedMsbtFolders ??= new(GetMsbtFolders());
+        public SortedSet<string> GetSortedMsbtFolders() => sortedMsbtFolders ??= [.. GetMsbtFolders()];
 
         /*
          * One language
          */
         public SortedSet<string> GetOneLangMsbtNames(string lang, string msbtFolder)
         {
-            return new(msbts[lang][msbtFolder].Keys);
+            return [.. msbts[lang][msbtFolder].Keys];
         }
 
         public void AddMsbtOneLang(string lang, string msbtFolder, string msbtName)
         {
             if (!msbts[lang][msbtFolder].ContainsKey(msbtName))
             {
-                msbts[lang][msbtFolder][msbtName] = new();
+                msbts[lang][msbtFolder][msbtName] = [];
             }
         }
 
         public SortedSet<string> GetOneLangMsbtKeys(string lang, string msbtFolder, string msbtName)
         {
-            if (!msbts[lang][msbtFolder].ContainsKey(msbtName)) return new();
-            return new(msbts[lang][msbtFolder][msbtName].Keys);
+            if (!msbts[lang][msbtFolder]
+                .TryGetValue(msbtName, out Dictionary<string, MsbtEntry>? value))
+            {
+                return [];
+            }
+            return [.. value.Keys];
         }
 
         public void AddMsbtKeyOneLang(string lang, string msbtFolder, string msbtName, string key)
@@ -83,7 +94,7 @@ namespace BotwLocalizationEditor.Models
             }
             if (!msbts[lang][msbtFolder].ContainsKey(msbtName))
             {
-                msbts[lang][msbtFolder][msbtName] = new();
+                msbts[lang][msbtFolder][msbtName] = [];
             }
             if (!msbts[lang][msbtFolder][msbtName].ContainsKey(key))
             {
@@ -102,12 +113,8 @@ namespace BotwLocalizationEditor.Models
          */
         public SortedSet<string> GetAllLangsMsbtNames(string msbtFolder)
         {
-            HashSet<string> names = new();
-            foreach (string name in msbts.Values.SelectMany(_ => _[msbtFolder].Keys))
-            {
-                names.Add(name);
-            }
-            return new(names);
+            HashSet<string> names = [.. msbts.Values.SelectMany(_ => _[msbtFolder].Keys)];
+            return [.. names];
         }
 
         public void AddMsbtAllLangs(string msbtFolder, string msbtName)
@@ -120,13 +127,9 @@ namespace BotwLocalizationEditor.Models
 
         public SortedSet<string> GetAllLangsMsbtKeys(string msbtFolder, string msbtName)
         {
-            if (!msbts.Any(l => l.Value[msbtFolder].ContainsKey(msbtName))) return new();
-            HashSet<string> keys = new();
-            foreach (string key in msbts.Values.SelectMany(_ => _[msbtFolder][msbtName].Keys))
-            {
-                keys.Add(key);
-            }
-            return new(keys);
+            if (!msbts.Any(l => l.Value[msbtFolder].ContainsKey(msbtName))) return [];
+            HashSet<string> keys = [.. msbts.Values.SelectMany(_ => _[msbtFolder][msbtName].Keys)];
+            return [.. keys];
         }
 
         public void AddMsbtKeyAllLangs(string msbtFolder, string msbtName, string key)
@@ -139,7 +142,7 @@ namespace BotwLocalizationEditor.Models
 
         public Dictionary<string, string> GetAllLangsMsbtValues(string msbtFolder, string msbtName, string key)
         {
-            Dictionary<string, string> values = new();
+            Dictionary<string, string> values = [];
             foreach (string lang in msbts.Keys)
             {
                 values.Add(lang, GetOneLangMsbtValue(lang, msbtFolder, msbtName, key));
@@ -157,12 +160,12 @@ namespace BotwLocalizationEditor.Models
 
         public void Save(string folder, bool be = false)
         {
-            Endian endian = be ? Endian.Big : Endian.Little;
-            Endianness endianness = be ? Endianness.Big : Endianness.Little;
+            Endianness endian = be ? Endianness.Big : Endianness.Little;
+            MsbtLib.Endianness endianness = be ? MsbtLib.Endianness.Big : MsbtLib.Endianness.Little;
 
             foreach ((string lang, Dictionary<string, Dictionary<string, Dictionary<string, MsbtEntry>>> files) in msbts)
             {
-                SarcFile msg = new(new(), endian);
+                Sarc msg = new() { Endianness = endian };
                 foreach ((string msbtFolder, Dictionary<string, Dictionary<string, MsbtEntry>> msbtNames) in files)
                 {
                     foreach ((string msbtName, Dictionary<string, MsbtEntry> dict) in msbtNames)
@@ -172,33 +175,43 @@ namespace BotwLocalizationEditor.Models
                         msbt.CreateAtr1();
                         msbt.CreateTxt2();
                         msbt.SetTexts(dict);
-                        msg.Files[$"{msbtFolder}/{msbtName}"] = msbt.Write();
+                        msg[$"{msbtFolder}/{msbtName}"] = msbt.Write();
                     }
                 }
 
-                SarcFile bootup = new(new(), endian);
-                bootup.Files[$"Message/Msg_{lang}.product.ssarc"] = Yaz0.Compress(msg.ToBinary());
+                Sarc bootup = new() { Endianness = endian };
+                using (MemoryStream stream = new())
+                {
+                    msg.Write(stream);
+                    bootup[$"Message/Msg_{lang}.product.ssarc"] = Yaz0.Compress(
+                        new ReadOnlySpan<byte>(stream.GetBuffer())[..(int)stream.Length]
+                    ).ToArray();
+                }
 
-                File.WriteAllBytes($"{folder}/Bootup_{lang}.pack", bootup.ToBinary());
+                using (MemoryStream stream = new())
+                {
+                    bootup.Write(stream);
+                    File.WriteAllBytes($"{folder}/Bootup_{lang}.pack", stream.GetBuffer());
+                }
             }
         }
 
         private Dictionary<string, Dictionary<string, HashSet<string>>> MergeAllLanguageFiles()
         {
-            Dictionary<string, Dictionary<string, HashSet<string>>> allKeys = new();
+            Dictionary<string, Dictionary<string, HashSet<string>>> allKeys = [];
             foreach (var folderSet in msbts.Values)
             {
                 foreach ((string folder, var fileSet) in folderSet)
                 {
                     if (!allKeys.ContainsKey(folder))
                     {
-                        allKeys[folder] = new();
+                        allKeys[folder] = [];
                     }
                     foreach ((string file, var keySet) in fileSet)
                     {
                         if (!allKeys[folder].ContainsKey(file))
                         {
-                            allKeys[folder][file] = new();
+                            allKeys[folder][file] = [];
                         }
                         foreach ((string key, MsbtEntry value) in keySet)
                         {
@@ -226,7 +239,7 @@ namespace BotwLocalizationEditor.Models
 
         public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> FindMissing(Dictionary<string, Dictionary<string, HashSet<string>>> allKeys)
         {
-            Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ret = new();
+            Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ret = [];
 
             foreach ((string folder, var fileSet) in allKeys)
             {
@@ -234,14 +247,16 @@ namespace BotwLocalizationEditor.Models
                 {
                     if (!msbtSet.ContainsKey(folder))
                     {
-                        if (!ret.ContainsKey(lang))
+                        if (!ret.TryGetValue(lang, out Dictionary<string, Dictionary<string, Dictionary<string, bool>>>? value))
                         {
-                            ret[lang] = new();
+                            value = [];
+                            ret[lang] = value;
                         }
-                        ret[lang][folder] = new();
+
+                        value[folder] = [];
                         foreach ((string file, var keySet) in allKeys[folder])
                         {
-                            ret[lang][folder][file] = keySet.ToDictionary(k => k, k => false);
+                            value[folder][file] = keySet.ToDictionary(k => k, k => false);
                         }
                     }
                     foreach ((string file, var keySet) in fileSet)
@@ -250,11 +265,11 @@ namespace BotwLocalizationEditor.Models
                         {
                             if (!ret.ContainsKey(lang))
                             {
-                                ret[lang] = new();
+                                ret[lang] = [];
                             }
                             if (!ret[lang].ContainsKey(folder))
                             {
-                                ret[lang][folder] = new();
+                                ret[lang][folder] = [];
                             }
                             ret[lang][folder][file] = keySet.ToDictionary(k => k, k => false);
                         }
@@ -262,11 +277,11 @@ namespace BotwLocalizationEditor.Models
                         {
                             bool missing = false;
                             bool missType = false;
-                            if (!msbtSet[folder][file].ContainsKey(key))
+                            if (!msbtSet[folder][file].TryGetValue(key, out MsbtEntry? value))
                             {
                                 missing = true;
                             }
-                            else if (string.IsNullOrEmpty(msbtSet[folder][file][key].Value))
+                            else if (string.IsNullOrEmpty(value.Value))
                             {
                                 missing = true;
                                 missType = true;
@@ -275,15 +290,15 @@ namespace BotwLocalizationEditor.Models
                             {
                                 if (!ret.ContainsKey(lang))
                                 {
-                                    ret[lang] = new();
+                                    ret[lang] = [];
                                 }
                                 if (!ret[lang].ContainsKey(folder))
                                 {
-                                    ret[lang][folder] = new();
+                                    ret[lang][folder] = [];
                                 }
                                 if (!ret[lang][folder].ContainsKey(file))
                                 {
-                                    ret[lang][folder][file] = new();
+                                    ret[lang][folder][file] = [];
                                 }
                                 ret[lang][folder][file][key] = missType;
                             }

@@ -31,43 +31,36 @@ namespace BotwLocalizationEditor.ViewModels
     {
         // Static Variables/Fields
         private static string? settingsPath;
-        private static readonly string[] possibleSettingsPaths = new string[2]
-        {
-            Path.Combine(Directory.GetParent(System.Reflection.Assembly.GetExecutingAssembly().Location)!.FullName, "settings.json"),
+        private static readonly string[] possibleSettingsPaths =
+        [
+            Path.Combine(Directory.GetParent(AppContext.BaseDirectory)!.FullName, "settings.json"),
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ble", "settings.json"),
-        };
+        ];
         private static string SettingsPath => settingsPath ??= File.Exists(possibleSettingsPaths[0]) ? possibleSettingsPaths[0] : possibleSettingsPaths[1];
 
         // Instance Variables/Fields
-        public Settings settings;
+        public Settings settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter());
         public string DumpPath { get => settings.dumpPath; set => this.RaiseAndSetIfChanged(ref settings.dumpPath, value); }
-        public bool LightTheme { get => settings.theme == Theme.Light; }
-        public bool DarkTheme { get => settings.theme == Theme.Dark; }
-        public bool PermanentInstall { get => settings.installType == InstallType.Permanent; }
-        public bool PortableInstall { get => settings.installType == InstallType.Portable; }
-
-        public SettingsViewModel()
-        {
-            settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter())!;
-        }
+        public bool LightTheme => settings.theme == Theme.Light;
+        public bool DarkTheme => settings.theme == Theme.Dark;
+        public bool PermanentInstall => settings.installType == InstallType.Permanent;
+        public bool PortableInstall => settings.installType == InstallType.Portable;
 
         public static void InitSettingsFile()
         {
-            if (!File.Exists(SettingsPath))
-            {
-                Directory.CreateDirectory(Directory.GetParent(SettingsPath)!.FullName);
-                File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(new Settings(), new StringEnumConverter()));
-            }
+            if (File.Exists(SettingsPath)) return;
+            Directory.CreateDirectory(Directory.GetParent(SettingsPath)!.FullName);
+            File.WriteAllText(SettingsPath, JsonConvert.SerializeObject(new Settings(), new StringEnumConverter()));
         }
 
         public static string GetDumpPath()
         {
-            return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter())!.dumpPath;
+            return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter()).dumpPath;
         }
 
         public static Theme GetTheme()
         {
-            return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter())!.theme;
+            return JsonConvert.DeserializeObject<Settings>(File.ReadAllText(SettingsPath), new StringEnumConverter()).theme;
         }
 
         public void OnInstallTypeSelected(int installTypeNum)

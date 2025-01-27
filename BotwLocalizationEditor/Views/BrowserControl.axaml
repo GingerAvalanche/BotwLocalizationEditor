@@ -21,7 +21,7 @@
              Text="{Binding Filter}"
              Height="23"/>
     <ListBox Grid.Row="1"
-             Name="List"
+             Name="ItemList"
              ItemsSource="{Binding Items}"
              SelectedItem="{Binding Selected}"
 				     Background="Transparent">

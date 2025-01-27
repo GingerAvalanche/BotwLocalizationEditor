@@ -2,7 +2,9 @@ using Avalonia.Controls;
 using BotwLocalizationEditor.Interfaces;
 using BotwLocalizationEditor.Models;
 using BotwLocalizationEditor.Views;
+using OperationResult;
 using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,16 +14,25 @@ namespace BotwLocalizationEditor.ViewModels
     public class MainWindowViewModel : ViewModelBase
     {
         private string title = "BotwLocalizationEditor";
-        private string loadFolder;
+        private string loadFolder = string.Empty;
         private readonly UserControl[] languageControls;
         private UserControl selectedLanguageControl;
         private int languageSelector;
-        public string Title { get => title; set => this.RaiseAndSetIfChanged(ref title, value); }
-        public string LoadFolder { get => loadFolder; }
-        public UserControl SelectedLanguageControl { get => selectedLanguageControl; set { this.RaiseAndSetIfChanged(ref selectedLanguageControl, value); } }
-        public bool IsSingleLanguage { get => languageSelector == 0; }
-        public bool IsDualLanguage { get => languageSelector == 1; }
-        public bool IsOmniLanguage { get => languageSelector == 2; }
+        public string Title
+        {
+            get => title;
+            set => this.RaiseAndSetIfChanged(ref title, value);
+        }
+        public string LoadFolder => loadFolder;
+
+        public UserControl SelectedLanguageControl
+        {
+            get => selectedLanguageControl;
+            set => this.RaiseAndSetIfChanged(ref selectedLanguageControl, value);
+        }
+        public bool IsSingleLanguage => languageSelector == 0;
+        public bool IsDualLanguage => languageSelector == 1;
+        public bool IsOmniLanguage => languageSelector == 2;
 
         public void OnLanguageModeSelected(int param)
         {
@@ -31,30 +42,37 @@ namespace BotwLocalizationEditor.ViewModels
 
         public MainWindowViewModel()
         {
-            loadFolder = "";
             languageSelector = 0;
 
-            languageControls = new UserControl[]
-            {
+            languageControls = [
                 new SingleLanguageControl(),
                 new DualLanguageControl(),
                 new OmniLanguageControl(),
-            };
+            ];
 
             selectedLanguageControl = languageControls[languageSelector];
         }
 
-        public void OpenFolder(string folder)
+        public Result<bool> OpenFolder(string folder)
         {
-            string mod = Path.GetFileName(folder);
-            Title = $"BotwLocalizationEditor - {mod}";
-            loadFolder = $"{folder}/content/Pack";
+            string[] paths = [
+                Path.Combine(folder, "content", "Pack"),
+                Path.Combine(folder, "01007EF00011E000", "romfs", "Pack")
+            ];
+            string temp = paths.Where(Directory.Exists).FirstOrDefault() ?? string.Empty;
+            if (temp == string.Empty)
+            {
+                return new InvalidOperationException($"Invalid root folder\n\nNeither of the following exist:\n{string.Join('\n', paths)}");
+            }
+            Title = $"BotwLocalizationEditor - {Path.GetFileName(folder)}";
+            loadFolder = temp;
             LanguageModel model = new(loadFolder);
             foreach (UserControl languageControl in languageControls)
             {
                 ((IUpdatable)languageControl).Update(model.GetLangs());
                 ((LanguageViewModelBase)languageControl.DataContext!).OnFolderChosen(model);
             }
+            return true;
         }
 
         public bool WillSaveOverwriteFile(string folder)

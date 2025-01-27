@@ -15,21 +15,17 @@ namespace BotwLocalizationEditor.ViewModels
         protected string chosenMsbtFolder;
         protected string chosenMsbtName;
         protected string chosenMsbtKey;
-        public string[] Languages
-        {
-            get => model.GetLangs();
-        }
+        public string[] Languages => model.GetLangs();
+
         public SortedSet<string> MsbtFolders
         {
             get => FolderBrowser.Items;
             set
             {
                 FolderBrowser.Items = value;
-                if (value.Count > 0)
-                {
-                    ChosenMsbtFolder = FolderBrowser.Selected;
-                    MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
-                }
+                if (value.Count <= 0) return;
+                ChosenMsbtFolder = FolderBrowser.Selected;
+                MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
             }
         }
         public SortedSet<string> MsbtNames
@@ -38,11 +34,9 @@ namespace BotwLocalizationEditor.ViewModels
             set
             {
                 MsbtBrowser.Items = value;
-                if (value.Count > 0)
-                {
-                    ChosenMsbtName = MsbtBrowser.Selected;
-                    MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
-                }
+                if (value.Count <= 0) return;
+                ChosenMsbtName = MsbtBrowser.Selected;
+                MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
             }
         }
         public SortedSet<string> MsbtKeys
@@ -62,9 +56,9 @@ namespace BotwLocalizationEditor.ViewModels
         public BrowserControl FolderBrowser => browserControls[0];
         public BrowserControl MsbtBrowser => browserControls[1];
         public BrowserControl KeyBrowser => browserControls[2];
-        public bool IsShowFolder { get => selectedBrowserControlIndex == 1; }
-        public bool IsShowMsbtName { get => selectedBrowserControlIndex == 2; }
-        public bool IsShowMsbtKey { get => selectedBrowserControlIndex == 3; }
+        public bool IsShowFolder => selectedBrowserControlIndex == 1;
+        public bool IsShowMsbtName => selectedBrowserControlIndex == 2;
+        public bool IsShowMsbtKey => selectedBrowserControlIndex == 3;
 
         public LanguageViewModelBase()
         {
@@ -112,7 +106,7 @@ namespace BotwLocalizationEditor.ViewModels
             MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
         }
 
-        protected virtual void OnLanguagesSet(string[] langs)
+        protected virtual void OnLanguagesSet(string[] languages)
         {
             MsbtFolders = model.GetSortedMsbtFolders();
         }
@@ -120,29 +114,23 @@ namespace BotwLocalizationEditor.ViewModels
 
         private void MsbtFolder_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            if (sender != null && sender is ListBox box && box.SelectedItem != null)
-            {
-                ChosenMsbtFolder = (string)box.SelectedItem;
-                MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
-            }
+            if (sender is not ListBox { SelectedItem: not null } box) return;
+            ChosenMsbtFolder = (string)box.SelectedItem;
+            MsbtNames = model.GetAllLangsMsbtNames(chosenMsbtFolder);
         }
 
         private void MsbtName_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            if (sender != null && sender is ListBox box && box.SelectedItem != null)
-            {
-                ChosenMsbtName = (string)box.SelectedItem;
-                MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
-            }
+            if (sender is not ListBox { SelectedItem: not null } box) return;
+            ChosenMsbtName = (string)box.SelectedItem;
+            MsbtKeys = model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
         }
 
         private void MsbtKey_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            if (sender != null && sender is ListBox box && box.SelectedItem != null)
-            {
-                ChosenMsbtKey = (string)box.SelectedItem;
-                OnKeyChanged(chosenMsbtKey);
-            }
+            if (sender == null || sender is not ListBox box || box.SelectedItem == null) return;
+            ChosenMsbtKey = (string)box.SelectedItem;
+            OnKeyChanged(chosenMsbtKey);
         }
 
         public Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, bool>>>> ScanForMissing()

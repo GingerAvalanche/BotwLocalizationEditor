@@ -9,7 +9,7 @@ namespace BotwLocalizationEditor.ViewModels
     {
         private string chosenLanguage;
         private string locText;
-        private readonly BrowserControl langBrowser;
+
         public string ChosenLanguage
         {
             get => chosenLanguage;
@@ -25,22 +25,25 @@ namespace BotwLocalizationEditor.ViewModels
                 }
             }
         }
-        public BrowserControl LanguageBrowser => langBrowser;
+        public BrowserControl LanguageBrowser { get; }
 
         public SingleLanguageViewModel()
         {
             chosenLanguage = string.Empty;
             locText = string.Empty;
-            langBrowser = new(Lang_SelectionChanged);
-            langBrowser.AddButton.IsVisible = false;
+            LanguageBrowser = new(Lang_SelectionChanged)
+            {
+                AddButton =
+                {
+                    IsVisible = false
+                }
+            };
         }
 
         private void Lang_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            if (sender != null && sender is ListBox box && box.SelectedItem != null)
-            {
-                ChosenLanguage = (string)box.SelectedItem;
-            }
+            if (sender is not ListBox { SelectedItem: not null } box) return;
+            ChosenLanguage = (string)box.SelectedItem;
         }
 
         public string LocText
@@ -57,7 +60,7 @@ namespace BotwLocalizationEditor.ViewModels
         public override void OnFolderChosen(LanguageModel languageModel)
         {
             LanguageBrowser.Items = languageModel.GetSortedLangs();
-            this.RaiseAndSetIfChanged(ref chosenLanguage, (string)LanguageBrowser.List.SelectedItem!, nameof(ChosenLanguage));
+            this.RaiseAndSetIfChanged(ref chosenLanguage, (string)LanguageBrowser.ItemList.SelectedItem!, nameof(ChosenLanguage));
             base.OnFolderChosen(languageModel);
         }
 
