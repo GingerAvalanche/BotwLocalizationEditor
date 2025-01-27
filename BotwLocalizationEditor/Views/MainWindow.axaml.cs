@@ -9,6 +9,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BotwLocalizationEditor.Views
 {
@@ -32,38 +33,44 @@ namespace BotwLocalizationEditor.Views
 
         private async void Settings_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            await new SettingsWindow().ShowDialog(this);
+            try
+            {
+                await new SettingsWindow().ShowDialog(this);
+            }
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
         }
 
         private async void Open_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var selection = await StorageProvider.OpenFolderPickerAsync(
+            try
+            {
+                var selection = await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
                 );
-            if (selection.Count != 1)
-            {
-                return;
+                if (selection.Count != 1)
+                {
+                    return;
+                }
+
+                string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
+                if (string.IsNullOrEmpty(folder)) return;
+                (DataContext as MainWindowViewModel)!.OpenFolder(folder)
+                    .Deconstruct(out bool success, out _, out Exception? ex);
+                if (!success)
+                {
+                    throw ex!;
+                }
             }
-            string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
-            if (string.IsNullOrEmpty(folder)) return;
-            (DataContext as MainWindowViewModel)!.OpenFolder(folder)
-                .Deconstruct(out _, out _, out Exception? ex);
-            if (ex != null)
+            catch (Exception ex)
             {
-                await MessageBoxManager.GetMessageBoxStandard(
-                    new MessageBoxStandardParams()
-                    {
-                        ButtonDefinitions = ButtonEnum.Ok,
-                        ContentTitle = "Error",
-                        ContentMessage = ex.Message,
-                        MaxHeight = 800,
-                        Width = 500,
-                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                    }).ShowWindowDialogAsync(this);
+                await ErrorDialog(ex);
             }
         }
 
@@ -74,36 +81,43 @@ namespace BotwLocalizationEditor.Views
 
         private async void SaveAs_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var selection = await StorageProvider.OpenFolderPickerAsync(
+            try
+            {
+                var selection = await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
                 );
-            if (selection.Count != 1)
-            {
-                return;
-            }
-            string folder = Path.Combine(Uri.UnescapeDataString(selection[0].Path.AbsolutePath), "content", "Pack");
-            MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
-            if (vm.WillSaveOverwriteFile(folder))
-            {
-                var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
-                    new MessageBoxStandardParams()
-                    {
-                        ButtonDefinitions = ButtonEnum.OkCancel,
-                        ContentTitle = "Save As...",
-                        ContentHeader = "Files already exist in the destination!",
-                        ContentMessage = "Saving will overwrite existing localization files in the selected folder. Continue?",
-                    });
-                ButtonResult result = await messageBoxStandardWindow.ShowWindowDialogAsync(this);
-                if (result == ButtonResult.Cancel)
+                if (selection.Count != 1)
                 {
                     return;
                 }
+                string folder = Path.Combine(Uri.UnescapeDataString(selection[0].Path.AbsolutePath), "content", "Pack");
+                MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
+                if (vm.WillSaveOverwriteFile(folder))
+                {
+                    var messageBoxStandardWindow = MessageBoxManager.GetMessageBoxStandard(
+                        new MessageBoxStandardParams()
+                        {
+                            ButtonDefinitions = ButtonEnum.OkCancel,
+                            ContentTitle = "Save As...",
+                            ContentHeader = "Files already exist in the destination!",
+                            ContentMessage = "Saving will overwrite existing localization files in the selected folder. Continue?",
+                        });
+                    ButtonResult result = await messageBoxStandardWindow.ShowWindowDialogAsync(this);
+                    if (result == ButtonResult.Cancel)
+                    {
+                        return;
+                    }
+                }
+                vm.SaveFiles(folder);
             }
-            vm.SaveFiles(folder);
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
         }
 
         private void Exit_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -116,19 +130,21 @@ namespace BotwLocalizationEditor.Views
 
         private async void ScanMissingEmpty_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
-            var missing = vm.ScanForMissing();
-            string message;
-            WindowIcon icon;
-            if (missing.Count == 0)
+            try
             {
-                message = "None missing!";
-            }
-            else
-            {
-                message = string.Join(
-                    "\n",
-                    missing.Select(
+                MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
+                var missing = vm.ScanForMissing();
+                string message;
+                WindowIcon icon;
+                if (missing.Count == 0)
+                {
+                    message = "None missing!";
+                }
+                else
+                {
+                    message = string.Join(
+                        "\n",
+                        missing.Select(
                             l => $"{l.Key}:\n\t{string.Join(
                                 "\n\t",
                                 l.Value.Select(
@@ -144,96 +160,129 @@ namespace BotwLocalizationEditor.Views
                                 ).ToImmutableSortedSet()
                             )}"
                         ).ToImmutableSortedSet()
-                );
-            }
+                    );
+                }
 
-            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
-            {
-                icon = new(streamReader);
-            }
-            await MessageBoxManager.GetMessageBoxStandard(
-                new MessageBoxStandardParams()
+                await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
                 {
-                    ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "Scan for Missing/Empty Keys",
-                    ContentHeader = "These keys are either missing from the given language, or they contain no text for that language:",
-                    ContentMessage = message,
-                    MaxHeight = 800,
-                    Width = 400,
-                    WindowIcon = icon,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                }).ShowWindowDialogAsync(this);
+                    icon = new(streamReader);
+                }
+                await MessageBoxManager.GetMessageBoxStandard(
+                    new MessageBoxStandardParams()
+                    {
+                        ButtonDefinitions = ButtonEnum.Ok,
+                        ContentTitle = "Scan for Missing/Empty Keys",
+                        ContentHeader = "These keys are either missing from the given language, or they contain no text for that language:",
+                        ContentMessage = message,
+                        MaxHeight = 800,
+                        Width = 400,
+                        WindowIcon = icon,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    }).ShowWindowDialogAsync(this);
+            }
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
         }
 
         private async void ScanNew_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
-            var missing = vm.ScanForNew();
-            string message;
-            WindowIcon icon;
-            if (missing.Count == 0)
+            try
             {
-                message = "No new keys!";
-            }
-            else
-            {
-                message = string.Join(
-                    "\n",
-                    missing.Select(
-                        f => $"{f.Key}:\n\t{string.Join(
-                            "\n\t",
-                            f.Value.Select(
-                                fi => $"{fi.Key}:\n\t\t{string.Join(
-                                    "\n\t\t",
-                                    fi.Value.Keys.ToImmutableSortedSet()
-                                )}"
-                            ).ToImmutableSortedSet()
-                        )}"
-                    ).ToImmutableSortedSet()
-                );
-            }
-
-            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
-            {
-                icon = new(streamReader);
-            }
-            await MessageBoxManager.GetMessageBoxStandard(
-                new MessageBoxStandardParams()
+                MainWindowViewModel vm = (DataContext as MainWindowViewModel)!;
+                var missing = vm.ScanForNew();
+                string message;
+                WindowIcon icon;
+                if (missing.Count == 0)
                 {
-                    ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "Scan for New Keys",
-                    ContentHeader = "These keys are new in your mod:",
-                    ContentMessage = message,
-                    MaxHeight = 800,
-                    Width = 400,
-                    WindowIcon = icon,
-                    WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                }).ShowWindowDialogAsync(this);
+                    message = "No new keys!";
+                }
+                else
+                {
+                    message = string.Join(
+                        "\n",
+                        missing.Select(
+                            f => $"{f.Key}:\n\t{string.Join(
+                                "\n\t",
+                                f.Value.Select(
+                                    fi => $"{fi.Key}:\n\t\t{string.Join(
+                                        "\n\t\t",
+                                        fi.Value.Keys.ToImmutableSortedSet()
+                                    )}"
+                                ).ToImmutableSortedSet()
+                            )}"
+                        ).ToImmutableSortedSet()
+                    );
+                }
+
+                await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
+                {
+                    icon = new(streamReader);
+                }
+                await MessageBoxManager.GetMessageBoxStandard(
+                    new MessageBoxStandardParams()
+                    {
+                        ButtonDefinitions = ButtonEnum.Ok,
+                        ContentTitle = "Scan for New Keys",
+                        ContentHeader = "These keys are new in your mod:",
+                        ContentMessage = message,
+                        MaxHeight = 800,
+                        Width = 400,
+                        WindowIcon = icon,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    }).ShowWindowDialogAsync(this);
+            }
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
         }
 
         private async void About_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            string message;
-            WindowIcon icon;
-            using (var streamReader = new StreamReader(AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/about.md"))))
+            try
             {
-                message = await streamReader.ReadToEndAsync();
-            }
+                string message;
+                WindowIcon icon;
+                using (var streamReader = new StreamReader(AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/about.md"))))
+                {
+                    message = await streamReader.ReadToEndAsync();
+                }
 
-            await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
-            {
-                icon = new(streamReader);
+                await using (var streamReader = AssetLoader.Open(new("avares://BotwLocalizationEditor/Assets/icon.png")))
+                {
+                    icon = new(streamReader);
+                }
+                await MessageBoxManager.GetMessageBoxStandard(
+                    new MessageBoxStandardParams()
+                    {
+                        ButtonDefinitions = ButtonEnum.Ok,
+                        ContentTitle = "About",
+                        ContentMessage = message,
+                        Markdown = true,
+                        MaxHeight = 800,
+                        Width = 500,
+                        WindowIcon = icon,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    }).ShowWindowDialogAsync(this);
             }
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
+        }
+
+        private async Task ErrorDialog(Exception ex)
+        {
             await MessageBoxManager.GetMessageBoxStandard(
-                new MessageBoxStandardParams()
+                new()
                 {
                     ButtonDefinitions = ButtonEnum.Ok,
-                    ContentTitle = "About",
-                    ContentMessage = message,
-                    Markdown = true,
+                    ContentTitle = "Error",
+                    ContentMessage = ex.Message,
                     MaxHeight = 800,
                     Width = 500,
-                    WindowIcon = icon,
                     WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 }).ShowWindowDialogAsync(this);
         }
