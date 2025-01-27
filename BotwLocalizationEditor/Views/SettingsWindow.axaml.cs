@@ -2,6 +2,8 @@ using Avalonia.Controls;
 using BotwLocalizationEditor.ViewModels;
 using System;
 using System.IO;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 
 namespace BotwLocalizationEditor.Views
 {
@@ -44,19 +46,35 @@ namespace BotwLocalizationEditor.Views
 
         private async void BrowseButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            var selection = (await StorageProvider.OpenFolderPickerAsync(
+            try
+            {
+                var selection = (await StorageProvider.OpenFolderPickerAsync(
                     new()
                     {
                         Title = "Select the root folder of your mod",
                         AllowMultiple = false,
                     }
                 ));
-            if (selection.Count != 1)
-            {
-                return;
+                if (selection.Count != 1)
+                {
+                    return;
+                }
+                string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
+                ((SettingsViewModel)DataContext!).DumpPath = folder;
             }
-            string folder = Uri.UnescapeDataString(selection[0].Path.AbsolutePath);
-            ((SettingsViewModel)DataContext!).DumpPath = folder;
+            catch (Exception ex)
+            {
+                await MessageBoxManager.GetMessageBoxStandard(
+                    new()
+                    {
+                        ButtonDefinitions = ButtonEnum.Ok,
+                        ContentTitle = "Error",
+                        ContentMessage = ex.Message,
+                        MaxHeight = 800,
+                        Width = 500,
+                        WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                    }).ShowWindowDialogAsync(this);
+            }
         }
 
         private void SaveButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
