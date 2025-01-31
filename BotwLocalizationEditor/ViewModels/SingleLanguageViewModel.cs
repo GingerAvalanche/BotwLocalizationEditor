@@ -60,7 +60,7 @@ namespace BotwLocalizationEditor.ViewModels
 
         public override void OnFolderChosen(LanguageModel languageModel)
         {
-            LanguageBrowser.Items = languageModel.GetSortedLangs();
+            LanguageBrowser.Items = languageModel.GetSortedLanguages();
             this.RaiseAndSetIfChanged(ref chosenLanguage, (string)LanguageBrowser.ItemList.SelectedItem!, nameof(ChosenLanguage));
             base.OnFolderChosen(languageModel);
         }

@@ -11,7 +11,7 @@ namespace BotwLocalizationEditor.ViewModels
 
         protected override void OnKeyChanged(string key)
         {
-            Dictionary<string, string> newLocs = Model.GetAllLangsMsbtValues(ChosenMsbtFolder, ChosenMsbtName, key);
+            Dictionary<string, string> newLocs = Model.GetAllLanguagesMsbtValues(ChosenMsbtFolder, ChosenMsbtName, key);
             foreach ((int langIdx, int gridIdx) in GridIndices(Languages.Length))
             {
                 LangBoxes[gridIdx].Text = newLocs[Languages[langIdx]];

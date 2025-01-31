@@ -103,7 +103,7 @@ namespace BotwLocalizationEditor.ViewModels
 
         public override void OnFolderChosen(LanguageModel languageModel)
         {
-            SortedSet<string> sortedLanguages = languageModel.GetSortedLangs();
+            SortedSet<string> sortedLanguages = languageModel.GetSortedLanguages();
             langBrowsers[0].Items = sortedLanguages;
             langBrowsers[0].ItemList.SelectedIndex = 0;
             langBrowsers[1].Items = sortedLanguages;

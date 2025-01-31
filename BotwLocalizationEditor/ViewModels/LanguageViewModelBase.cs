@@ -15,7 +15,7 @@ namespace BotwLocalizationEditor.ViewModels
         private string chosenMsbtFolder;
         private string chosenMsbtName;
         private string chosenMsbtKey;
-        public string[] Languages => Model.GetLangs();
+        public string[] Languages => Model.GetLanguages();
 
         public SortedSet<string> MsbtFolders
         {
@@ -25,7 +25,7 @@ namespace BotwLocalizationEditor.ViewModels
                 FolderBrowser.Items = value;
                 if (value.Count <= 0) return;
                 ChosenMsbtFolder = FolderBrowser.Selected;
-                MsbtNames = Model.GetAllLangsMsbtNames(chosenMsbtFolder);
+                MsbtNames = Model.GetAllLanguagesMsbtNames(chosenMsbtFolder);
             }
         }
         public SortedSet<string> MsbtNames
@@ -36,7 +36,7 @@ namespace BotwLocalizationEditor.ViewModels
                 MsbtBrowser.Items = value;
                 if (value.Count <= 0) return;
                 ChosenMsbtName = MsbtBrowser.Selected;
-                MsbtKeys = Model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
+                MsbtKeys = Model.GetAllLanguagesMsbtKeys(chosenMsbtFolder, chosenMsbtName);
             }
         }
         public SortedSet<string> MsbtKeys
@@ -86,7 +86,7 @@ namespace BotwLocalizationEditor.ViewModels
         public virtual void OnFolderChosen(LanguageModel languageModel)
         {
             Model = languageModel;
-            OnLanguagesSet(languageModel.GetLangs());
+            OnLanguagesSet(languageModel.GetLanguages());
         }
 
         public void OnTabSelected(int tabNum)
@@ -101,14 +101,14 @@ namespace BotwLocalizationEditor.ViewModels
 
         public void AddMsbt(string msbtName)
         {
-            Model.AddMsbtAllLangs(chosenMsbtFolder, msbtName);
-            MsbtNames = Model.GetAllLangsMsbtNames(chosenMsbtFolder);
+            Model.AddMsbtAllLanguages(chosenMsbtFolder, msbtName);
+            MsbtNames = Model.GetAllLanguagesMsbtNames(chosenMsbtFolder);
         }
 
         public void AddMsbtKey(string keyName)
         {
-            Model.AddMsbtKeyAllLangs(chosenMsbtFolder, chosenMsbtName, keyName);
-            MsbtKeys = Model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
+            Model.AddMsbtKeyAllLanguages(chosenMsbtFolder, chosenMsbtName, keyName);
+            MsbtKeys = Model.GetAllLanguagesMsbtKeys(chosenMsbtFolder, chosenMsbtName);
         }
 
         protected virtual void OnLanguagesSet(string[] languages)
@@ -121,14 +121,14 @@ namespace BotwLocalizationEditor.ViewModels
         {
             if (sender is not ListBox { SelectedItem: not null } box) return;
             ChosenMsbtFolder = (string)box.SelectedItem;
-            MsbtNames = Model.GetAllLangsMsbtNames(chosenMsbtFolder);
+            MsbtNames = Model.GetAllLanguagesMsbtNames(chosenMsbtFolder);
         }
 
         private void MsbtName_SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
             if (sender is not ListBox { SelectedItem: not null } box) return;
             ChosenMsbtName = (string)box.SelectedItem;
-            MsbtKeys = Model.GetAllLangsMsbtKeys(chosenMsbtFolder, chosenMsbtName);
+            MsbtKeys = Model.GetAllLanguagesMsbtKeys(chosenMsbtFolder, chosenMsbtName);
         }
 
         private void MsbtKey_SelectionChanged(object? sender, SelectionChangedEventArgs e)

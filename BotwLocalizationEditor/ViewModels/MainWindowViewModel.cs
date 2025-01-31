@@ -69,7 +69,7 @@ namespace BotwLocalizationEditor.ViewModels
             LanguageModel model = new(loadFolder);
             foreach (UserControl languageControl in languageControls)
             {
-                ((IUpdatable)languageControl).Update(model.GetLangs());
+                ((IUpdatable)languageControl).Update(model.GetLanguages());
                 ((LanguageViewModelBase)languageControl.DataContext!).OnFolderChosen(model);
             }
             return true;
