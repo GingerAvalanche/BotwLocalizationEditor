@@ -36,7 +36,8 @@
               Name="BrowseButton">
         Browse...
       </Button>
-      <TextBlock Grid.Row="1"
+      <TextBlock Grid.Column="0"
+                 Grid.Row="1"
                  VerticalAlignment="Center">
         Theme:
       </TextBlock>
@@ -53,9 +54,7 @@
             <sys:Int32>1</sys:Int32>
           </RadioButton.CommandParameter>
         </RadioButton>
-        <Separator Grid.Row="1"
-                   Grid.Column="1"
-                   Background="Transparent"/>
+        <Separator Background="Transparent"/>
         <RadioButton GroupName="Theme"
                      Content="Dark"
                      Command="{Binding OnThemeSelected}"
@@ -65,7 +64,8 @@
           </RadioButton.CommandParameter>
         </RadioButton>
       </StackPanel>
-      <TextBlock Grid.Row="2"
+      <TextBlock Grid.Column="0"
+                 Grid.Row="2"
                  VerticalAlignment="Center">
         Install Type:
       </TextBlock>
@@ -82,9 +82,7 @@
             <sys:Int32>1</sys:Int32>
           </RadioButton.CommandParameter>
         </RadioButton>
-        <Separator Grid.Row="1"
-                   Grid.Column="1"
-                   Background="Transparent"/>
+        <Separator Background="Transparent"/>
         <RadioButton GroupName="InstallType"
                      Content="Permanent"
                      Command="{Binding OnInstallTypeSelected}"
@@ -95,7 +93,7 @@
         </RadioButton>
       </StackPanel>
     </Grid>
-    <Grid Grid.Row="3"
+    <Grid Grid.Row="1"
           ColumnDefinitions="1*,80,80">
       <Button Grid.Column="1"
               HorizontalAlignment="Stretch"
