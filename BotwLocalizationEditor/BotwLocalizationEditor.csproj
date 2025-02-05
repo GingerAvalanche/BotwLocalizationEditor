@@ -32,7 +32,7 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.3" />
     <PackageReference Include="log4net" Version="3.0.3" />
     <PackageReference Include="MessageBox.Avalonia" Version="3.2.0" />
-    <PackageReference Include="MsbtLib" Version="0.10.0" />
+    <PackageReference Include="MsbtLib" Version="0.10.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="SarcLibrary" Version="3.2.0" />
     <PackageReference Include="CsYaz0" Version="1.0.2" />
