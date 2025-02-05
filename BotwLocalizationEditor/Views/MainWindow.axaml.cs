@@ -74,9 +74,16 @@ namespace BotwLocalizationEditor.Views
             }
         }
 
-        private void Save_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private async void Save_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            (DataContext as MainWindowViewModel)!.SaveFiles();
+            try
+            {
+                (DataContext as MainWindowViewModel)!.SaveFiles();
+            }
+            catch (Exception ex)
+            {
+                await ErrorDialog(ex);
+            }
         }
 
         private async void SaveAs_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -120,7 +127,7 @@ namespace BotwLocalizationEditor.Views
             }
         }
 
-        private void Exit_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private static void Exit_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             if (Avalonia.Application.Current!.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
